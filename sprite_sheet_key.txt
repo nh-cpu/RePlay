@@ -1,0 +1,40 @@
+| Position | Appearance | Suggested purpose |
+|---|---|---|
+| Row 1, left | Filled capsule with a shine | **Normal tap note** |
+| Row 1, second | Filled capsule with a small dot | Alternate note type, such as a hold-note head |
+| Row 1, third | Hollow capsule | **Receptor**—the stationary target notes arrive at |
+| Row 1, right | Glowing filled capsule | Receptor’s pressed or successful-hit appearance |
+| Row 2, left | Long rectangular strip | **Hold-note body** connecting its beginning and end |
+| Row 2, second | Long strip with a pointed bottom | Hold-note ending or tail |
+| Row 2, third | Thin horizontal glowing bar | Hit-line accent or brief hit flash |
+| Row 2, right | Small diamond | Special note or timing marker |
+| Row 3, left | Four-point sparkle | Successful-hit sparkle |
+| Row 3, second | Glowing hollow ring | Expanding hit ripple |
+| Row 3, third | Soft circular glow | Background glow behind a hit effect |
+| Row 3, right | Cluster of small diamonds | Decorative hit particles |
+| Row 4, left | Dark rounded rectangle | UI button or panel background |
+| Row 4, second | Two vertical bars | Pause icon |
+| Row 4, third | Triangle | Play or resume icon |
+| Row 4, right | Hollow diamond with glow | Special-note target or selection indicator |
+
+
+
+
+| Sprite | X | Y | W | H |
+|---|---:|---:|---:|---:|
+| Normal tap note | 0 | 0 | 313 | 313 |
+| Note with dot | 313 | 0 | 314 | 313 |
+| Hollow receptor | 627 | 0 | 313 | 313 |
+| Glowing receptor | 940 | 0 | 314 | 313 |
+| Hold body | 0 | 313 | 313 | 314 |
+| Pointed hold tail | 313 | 313 | 314 | 314 |
+| Glowing horizontal bar | 627 | 313 | 313 | 314 |
+| Diamond note | 940 | 313 | 314 | 314 |
+| Star sparkle | 0 | 627 | 313 | 313 |
+| Hollow glow ring | 313 | 627 | 314 | 313 |
+| Circular glow | 627 | 627 | 313 | 313 |
+| Diamond particles | 940 | 627 | 314 | 313 |
+| UI panel | 0 | 940 | 313 | 314 |
+| Pause icon | 313 | 940 | 314 | 314 |
+| Play icon | 627 | 940 | 313 | 314 |
+| Glowing hollow diamond | 940 | 940 | 314 | 314 |

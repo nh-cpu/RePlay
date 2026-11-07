@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d0wr8powr6nj0"]
 
 [ext_resource type="Script" uid="uid://ca2duobgbf5je" path="res://main.gd" id="1_0xm2m"]
-[ext_resource type="PackedScene" uid="uid://7yhqy2lerrxm" path="res://parent_note.tscn" id="2_h2yge"]
+[ext_resource type="PackedScene" uid="uid://djal0e2w43otn" path="res://note_generator.tscn" id="2_0xm2m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ke0wg"]
 size = Vector2(1205, 154.5)
@@ -17,4 +17,5 @@ script = ExtResource("1_0xm2m")
 position = Vector2(580, 569)
 shape = SubResource("RectangleShape2D_ke0wg")
 
-[node name="ParentNote" parent="." unique_id=2144895551 instance=ExtResource("2_h2yge")]
+[node name="NoteGenerator" parent="." unique_id=1015408756 instance=ExtResource("2_0xm2m")]
+position = Vector2(264, -4)

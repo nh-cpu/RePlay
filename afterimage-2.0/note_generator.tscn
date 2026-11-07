@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://djal0e2w43otn"]
+
+[ext_resource type="Script" uid="uid://buul3p1f372fa" path="res://note_generator.gd" id="1_64mla"]
+[ext_resource type="PackedScene" uid="uid://7yhqy2lerrxm" path="res://parent_note.tscn" id="2_6ugrk"]
+
+[node name="NoteGenerator" type="Node2D" unique_id=1015408756]
+script = ExtResource("1_64mla")
+scene_to_instance = ExtResource("2_6ugrk")
