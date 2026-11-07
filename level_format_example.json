@@ -1,0 +1,20 @@
+{
+  "format_version": 1,
+  "song": "res://audio/example.ogg",
+  "bpm": 120.0,
+  "offset_seconds": 0.15,
+  "lane_count": 4,
+  "notes": [
+    { "beat": 0.0, "lane": 0, "type": "tap" },
+    { "beat": 1.0, "lane": 2, "type": "tap" },
+    { "beat": 1.5, "lane": 1, "type": "tap" },
+    { "beat": 2.0, "lane": 0, "type": "tap" },
+    { "beat": 2.0, "lane": 3, "type": "tap" },
+    {
+      "beat": 4.0,
+      "lane": 2,
+      "type": "hold",
+      "duration_beats": 2.0
+    }
+  ]
+}
