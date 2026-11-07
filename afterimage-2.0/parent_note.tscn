@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://7yhqy2lerrxm"]
+
+[ext_resource type="Texture2D" uid="uid://b0rq5ek82erig" path="res://Minimal Rhythm Game Sprite Atlas.png" id="1_2bjly"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ciihl"]
+atlas = ExtResource("1_2bjly")
+region = Rect2(0, 0, 313, 313)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2bjly"]
+size = Vector2(246, 74)
+
+[node name="ParentNote" type="Node2D" unique_id=2144895551]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=759975209]
+texture = SubResource("AtlasTexture_ciihl")
+
+[node name="Area2D" type="Area2D" parent="Sprite2D" unique_id=1244375127]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sprite2D/Area2D" unique_id=1539783842]
+position = Vector2(1, 11)
+shape = SubResource("RectangleShape2D_2bjly")
