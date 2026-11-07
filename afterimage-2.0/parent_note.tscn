@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://7yhqy2lerrxm"]
+[gd_scene format=3 uid="uid://clm5l36r5w46x"]
 
 [ext_resource type="Texture2D" uid="uid://b0rq5ek82erig" path="res://Minimal Rhythm Game Sprite Atlas.png" id="1_2bjly"]
-[ext_resource type="Script" uid="uid://bgq70f4gf5j" path="res://parent_note.gd" id="1_ko41d"]
+[ext_resource type="Script" path="res://parent_note.gd" id="1_ko41d"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ciihl"]
 atlas = ExtResource("1_2bjly")
