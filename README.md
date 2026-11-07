@@ -93,6 +93,12 @@ derive from absolute song time rather than tweens or collision overlap.
 An active hold stays anchored to the receptor while its body shrinks.
 Atlas regions crop transparent padding without modifying the original PNG.
 
+The lane scenes render through a perspective playfield, narrowing toward
+the distance and widening toward the player. Notes, holds, and effects share
+one projection; touch coordinates use its inverse. Adjust `distant_width`
+on the Playfield node in `gameplay/perspective_playfield.tscn` to control
+the perspective strength (smaller values create a deeper perspective).
+
 The Compatibility renderer supports this 2D game on desktop and touch-capable
 devices. Portrait and landscape layouts are supported. Mobile export
 packaging is not included. When making a Godot export, add `*.json` to the

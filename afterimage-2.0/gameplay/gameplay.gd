@@ -17,8 +17,8 @@ var lanes: Array[RhythmLane] = []
 @onready var hud: Control = $HUD
 
 func _ready() -> void:
-	for child: Node in $Playfield.get_children():
-		lanes.append(child as RhythmLane)
+	lanes = $Playfield.get_lanes()
+	controls.position_mapper = $Playfield.screen_to_surface
 	for index: int in range(4):
 		lanes[index].configure(index)
 	$Music.stream = chart.audio
@@ -78,13 +78,14 @@ func _layout() -> void:
 	var width: float = minf(680.0, size.x - 24.0)
 	$Playfield.position = Vector2((size.x - width) / 2.0, 100)
 	$Playfield.size = Vector2(width, maxf(240.0, size.y - 124.0))
+	$Playfield.resize_surface()
 	controls.regions.clear()
 	for index: int in range(4):
 		var lane: RhythmLane = lanes[index]
 		lane.position = Vector2(index * width / 4.0, 0)
 		lane.size = Vector2(width / 4.0 - 2.0, $Playfield.size.y)
 		lane.layout_lane()
-		controls.regions.append(lane.get_global_rect())
+		controls.regions.append(Rect2(lane.position, lane.size))
 
 func _pause() -> void:
 	if finished:

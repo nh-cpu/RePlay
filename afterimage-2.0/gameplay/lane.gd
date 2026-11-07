@@ -17,6 +17,7 @@ func layout_lane() -> void:
 	receptor.set_width(size.x * 0.83)
 	key_label.position = Vector2(0, hit_y + 32)
 	key_label.size = Vector2(size.x, 35)
+	key_label.scale.y = 0.55
 
 func flash(grade: int) -> void:
 	if grade == 4:
@@ -24,4 +25,5 @@ func flash(grade: int) -> void:
 	var effect: Node2D = EFFECT.instantiate()
 	effect.position = receptor.position
 	effect.scale = Vector2.ONE * size.x / 160.0
+	effect.scale.y *= 0.45
 	add_child(effect)

@@ -6,6 +6,7 @@ signal released(lane: int)
 
 var enabled: bool = true
 var regions: Array[Rect2] = []
+var position_mapper: Callable
 var fingers: Dictionary = {}
 var keyboard: Array[bool] = [false, false, false, false]
 var held: Array[bool] = [false, false, false, false]
@@ -21,8 +22,9 @@ func _input(event: InputEvent) -> void:
 				_refresh(lane)
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			var point: Vector2 = position_mapper.call(event.position) if position_mapper.is_valid() else event.position
 			for lane: int in range(regions.size()):
-				if regions[lane].has_point(event.position):
+				if regions[lane].has_point(point):
 					fingers[event.index] = lane
 					_refresh(lane)
 					break

@@ -215,6 +215,19 @@ func _test_scenes() -> void:
 	var game: Control = app.screen
 	game.clock.freeze(true)
 	_check(game.lanes.size() == 4, "Four scene-based lanes")
+	var field: PerspectivePlayfield = game.get_node("Playfield")
+	for depth: float in [0.05, 0.5, 0.85]:
+		for lane_index: int in range(4):
+			var source_uv: Vector2 = Vector2((lane_index + 0.5) / 4.0, depth)
+			var perspective_scale: float = field.distant_width / (1.0 - (1.0 - field.distant_width) * depth)
+			var projected: Vector2 = Vector2(0.5 + (source_uv.x - 0.5) * perspective_scale, depth * perspective_scale)
+			var screen_point: Vector2 = field.get_global_transform_with_canvas() * (projected * field.size)
+			var mapped: Vector2 = field.screen_to_surface(screen_point)
+			_check(mapped.is_equal_approx(source_uv * Vector2(field.surface.size)), "Perspective inverse at lane %d, depth %.2f" % [lane_index, depth])
+			game.controls._input(_touch(20, screen_point, true))
+			_check(game.controls.held[lane_index], "Projected touch selects correct lane")
+			game.controls._input(_touch(20, screen_point, false))
+	_check(field.screen_to_surface(field.global_position + Vector2(1, 1)) == Vector2(-1, -1), "Outside trapezoid rejected")
 	game.clock.time = 2.0
 	game.judge.press(chart.notes[0].lane, 2.0)
 	game.scheduler.update(2.0, game.judge.states)

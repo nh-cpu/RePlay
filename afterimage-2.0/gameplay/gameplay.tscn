@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://gameplay/gameplay.gd" id="1"]
-[ext_resource type="PackedScene" path="res://gameplay/lane.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://gameplay/perspective_playfield.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://ui/game_hud.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://ui/pause_overlay.tscn" id="4"]
 [ext_resource type="Script" path="res://gameplay/song_clock.gd" id="5"]
@@ -28,15 +28,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.047, 0.063, 0.086, 1)
 
-[node name="Playfield" type="Control" parent="."]
-mouse_filter = 2
-[node name="Lane1" parent="Playfield" instance=ExtResource("2")]
-
-[node name="Lane2" parent="Playfield" instance=ExtResource("2")]
-
-[node name="Lane3" parent="Playfield" instance=ExtResource("2")]
-
-[node name="Lane4" parent="Playfield" instance=ExtResource("2")]
+[node name="Playfield" parent="." instance=ExtResource("2")]
 
 [node name="Music" type="AudioStreamPlayer" parent="."]
 
