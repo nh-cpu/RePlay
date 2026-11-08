@@ -5,11 +5,16 @@ Four-lane rhythm game for **Godot 4.7.2**. Open
 to launch the project. The included **First Light** track is a 36-second
 original synthesized demo with 72 taps, chord notes, and holds.
 
-The game starts in a landscape window sized to fit the current desktop monitor
-and centered within its usable area. Mobile uses the device's native screen
-with landscape orientation. Resizing the desktop window still adapts the UI.
+The game starts maximized to the desktop monitor's usable area. The UI follows
+the actual window size when maximizing, restoring, or resizing, without forcing
+a fixed aspect ratio. Mobile uses the native screen with landscape orientation.
 
 ## Playing
+
+Choose **Watch Mode** on the left of song selection to listen with animated album
+photos and no notes or scoring. Pause/resume with its button, Escape, or Enter;
+focus loss pauses playback. Use Replay when the track ends, or Back to return.
+Watch Mode shows photos independently of the gameplay Album background toggle.
 
 The song wheel supports mouse-wheel scrolling, click/drag, and touch dragging
 with inertia and snapping. **Up/down** or the controller D-pad/left stick browses
@@ -49,6 +54,10 @@ thumbnails, and drag the ≡ handles up/down to arrange them. The list scrolls
 automatically near its edges; dropping outside it or pressing Escape cancels
 the drag. Focus a handle and use Up/Down for keyboard reordering. Remove unwanted photos
 with ×, enter a title and optional description, then choose **Generate track**.
+Hold **Generate** or **Cancel** for three seconds. A progress line and the hold
+sound indicate progress; releasing early or losing focus resets the hold.
+The action proceeds immediately at three seconds while the menu sound plays.
+Escape focuses Cancel.
 Cancel discards the local draft; removing a photo never deletes the original.
 Previews are local and orientation-corrected. No upload occurs before confirmation.
 
@@ -185,6 +194,8 @@ godot --headless --path afterimage-2.0 --script res://tests/playback_check.gd
 godot --path afterimage-2.0 --script res://tests/visual_check.gd
 godot --path afterimage-2.0 --script res://tests/album_visual_check.gd
 godot --headless --path afterimage-2.0 --script res://tests/song_wheel_checks.gd
+godot --headless --path afterimage-2.0 --script res://tests/ui_audio_checks.gd
+godot --headless --path afterimage-2.0 --script res://tests/watch_checks.gd
 godot --path afterimage-2.0 --script res://tests/song_wheel_visual.gd
 python tools/build_assets.py
 ```

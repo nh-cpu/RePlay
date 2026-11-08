@@ -1,6 +1,7 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://ui/photo_review.gd" id="1"]
 [ext_resource type="Theme" path="res://assets/menu/menu_theme.tres" id="2"]
+[ext_resource type="Script" path="res://ui/hold_confirm_button.gd" id="hold"]
 [sub_resource type="StyleBoxFlat" id="panel"]
 bg_color = Color(0.075, 0.075, 0.09, 0.97)
 content_margin_left = 12.0
@@ -91,7 +92,9 @@ theme_override_constants/separation = 12
 alignment = 0
 [node name="Cancel" type="Button" parent="Layer/Root/Panel/Margin/Content/Buttons"]
 layout_mode = 2
-text = "CANCEL"
+text = "HOLD TO CANCEL"
+theme_override_font_sizes/font_size = 15
+script = ExtResource("hold")
 custom_minimum_size = Vector2(40, 40)
 focus_mode = 2
 [node name="Spacer" type="Control" parent="Layer/Root/Panel/Margin/Content/Buttons"]
@@ -100,13 +103,22 @@ size_flags_horizontal = 3
 mouse_filter = 2
 [node name="Generate" type="Button" parent="Layer/Root/Panel/Margin/Content/Buttons"]
 layout_mode = 2
-text = "GENERATE TRACK"
+text = "HOLD TO GENERATE"
+theme_override_font_sizes/font_size = 15
+script = ExtResource("hold")
 custom_minimum_size = Vector2(40, 40)
 focus_mode = 2
 [node name="DropMarker" type="ColorRect" parent="Layer/Root"]
 visible = false
 mouse_filter = 2
 color = Color(0.96, 0.92, 0.78, 1)
+[node name="InputBlocker" type="Control" parent="Layer/Root"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+focus_mode = 2
+mouse_filter = 0
 [node name="Picker" type="FileDialog" parent="."]
 title = "Choose album photos"
 file_mode = 1

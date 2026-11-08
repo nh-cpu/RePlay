@@ -167,6 +167,7 @@ func _run() -> void:
 	wheel.queue_free()
 	await process_frame
 	await _integration()
+	await create_timer(1.2).timeout
 	print("SONG WHEEL: %d assertions, %d failures" % [checks, failures])
 	quit(1 if failures else 0)
 

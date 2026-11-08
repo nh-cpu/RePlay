@@ -3,6 +3,7 @@ extends Control
 const HOME: PackedScene = preload("res://ui/home_menu.tscn")
 const GAME: PackedScene = preload("res://gameplay/gameplay.tscn")
 const RESULTS: PackedScene = preload("res://ui/results.tscn")
+const WATCH: PackedScene = preload("res://ui/watch_mode.tscn")
 var library: LevelLibrary = LevelLibrary.new()
 var selected: ChartData
 var screen: Control
@@ -19,7 +20,14 @@ func show_home() -> void:
 	menu.library = library
 	menu.service = generation
 	menu.play_requested.connect(start_game)
+	menu.watch_requested.connect(start_watch)
 	_replace(menu)
+
+func start_watch(chart: ChartData) -> void:
+	var watch: Control = WATCH.instantiate()
+	watch.chart = chart
+	watch.home_requested.connect(show_home)
+	_replace(watch)
 
 func start_game(chart: ChartData) -> void:
 	selected = chart

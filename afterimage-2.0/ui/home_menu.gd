@@ -1,6 +1,7 @@
 extends Control
 
 signal play_requested(chart: ChartData)
+signal watch_requested(chart: ChartData)
 
 const REVIEW: PackedScene = preload("res://ui/photo_review.tscn")
 var library: LevelLibrary
@@ -10,6 +11,10 @@ var tracks: Array[Dictionary] = []
 var review: Node2D
 var _chart_lookup: Dictionary = {}
 var _metadata: Dictionary = {}
+var _last_sound_song: String = ""
+var _last_variant_song: String = ""
+var _last_variant: String = ""
+var _button_launch: bool = false
 @onready var wheel: SongWheel = $Wheel
 @onready var detail: VBoxContainer = $Details
 @onready var status: Label = $Footer/Status
@@ -18,6 +23,7 @@ func _ready() -> void:
 	resized.connect(_layout_menu)
 	detail.minimum_size_changed.connect(_layout_menu.call_deferred)
 	$Footer/Actions/Play.pressed.connect(_play)
+	$Footer/Actions/Watch.pressed.connect(_watch)
 	$Footer/Actions/Create.pressed.connect(_open_review)
 	wheel.song_selected.connect(_song_changed)
 	wheel.difficulty_selected.connect(_difficulty_changed)
@@ -32,7 +38,11 @@ func _ready() -> void:
 	_refresh()
 	_job_changed()
 	_layout_menu()
-	wheel.grab_focus.call_deferred()
+	_focus_wheel.call_deferred()
+
+func _focus_wheel() -> void:
+	if is_inside_tree() and wheel.is_inside_tree():
+		wheel.grab_focus()
 
 func _refresh() -> void:
 	tracks = library.list_tracks()
@@ -63,6 +73,7 @@ func _refresh() -> void:
 	wheel.set_songs(values)
 	$Header/Count.text = "%02d TRACKS  /  YOUR MEMORIES, IN RHYTHM" % values.size()
 	$Footer/Actions/Play.disabled = values.is_empty()
+	$Footer/Actions/Watch.disabled = values.is_empty()
 	if values.is_empty():
 		detail.get_node("Title").text = "Your next memory"
 		detail.get_node("Stats").text = ""
@@ -71,6 +82,9 @@ func _refresh() -> void:
 		$Artwork.show_artwork("", null)
 
 func _song_changed(id: String) -> void:
+	if not _last_sound_song.is_empty() and _last_sound_song != id:
+		UISounds.play_menu()
+	_last_sound_song = id
 	var song: SongMetadata = _metadata[id]
 	detail.get_node("Title").text = song.title
 	var texture: Texture2D = wheel.artwork_for_song(song)
@@ -79,6 +93,10 @@ func _song_changed(id: String) -> void:
 	_layout_menu()
 
 func _difficulty_changed(_song_id: String, id: String) -> void:
+	if _last_variant_song == _song_id and not _last_variant.is_empty() and _last_variant != id:
+		UISounds.play_menu()
+	_last_variant_song = _song_id
+	_last_variant = id
 	if not _chart_lookup.has(id):
 		return
 	var chart: ChartData = _chart_lookup[id]
@@ -86,11 +104,20 @@ func _difficulty_changed(_song_id: String, id: String) -> void:
 	detail.get_node("Stats").text = "%s  /  %02d:%02d\n%.0f BPM   ·   %d NOTES" % [chart.difficulty.to_upper(), int(duration) / 60, int(duration) % 60, chart.bpm, chart.notes.size()]
 	detail.get_node("Best").text = "PERSONAL BEST\n%07d" % library.best(id)
 
+func _watch() -> void:
+	var id: String = wheel.selected_difficulty_id()
+	if not is_instance_valid(review) and _chart_lookup.has(id):
+		watch_requested.emit(_chart_lookup[id])
+
 func _play() -> void:
+	_button_launch = true
 	wheel.request_play()
+	_button_launch = false
 
 func _launch(_song_id: String, chart_id: String) -> void:
 	if not is_instance_valid(review) and _chart_lookup.has(chart_id):
+		if not _button_launch:
+			UISounds.play_menu()
 		play_requested.emit(_chart_lookup[chart_id])
 
 func _open_review() -> void:
@@ -101,7 +128,7 @@ func _open_review() -> void:
 	review.service = service
 	review.dismissed.connect(func() -> void:
 		wheel.set_navigation_enabled(true)
-		wheel.grab_focus.call_deferred())
+		_focus_wheel.call_deferred())
 	add_child(review)
 
 func _job_changed() -> void:
@@ -114,6 +141,10 @@ func _job_changed() -> void:
 
 func _layout_menu() -> void:
 	var portrait: bool = size.x < 760
+	$Footer/Actions/Watch.add_theme_font_size_override("font_size", 14 if portrait else 18)
+	$Footer/Actions/Create.add_theme_font_size_override("font_size", 13 if portrait else 15)
+	$Footer/Actions/Play.add_theme_font_size_override("font_size", 16 if portrait else 18)
+	$Footer/Actions/Play.custom_minimum_size.x = 80 if portrait else 120
 	$Header.position = Vector2(24, 20)
 	$Header.size = Vector2(size.x - 48, 62)
 	detail.position = Vector2(24, 100)

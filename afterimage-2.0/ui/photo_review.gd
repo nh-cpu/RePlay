@@ -11,15 +11,21 @@ var _drag_index: int = -1
 var _drag_pointer: int = -2
 var _drag_point: Vector2
 var _drop_slot: int = 0
+var _confirmation_locked: bool = false
 @onready var content: VBoxContainer = $Layer/Root/Panel/Margin/Content
 @onready var rows: VBoxContainer = $Layer/Root/Panel/Margin/Content/Scroll/Photos
 
 func _ready() -> void:
 	$Layer/Root.resized.connect(_layout_review)
+	content.get_node("Scroll").resized.connect(_resize_photo_rows)
 	_layout_review.call_deferred()
 	content.get_node("Add").pressed.connect(func() -> void: $Picker.popup_centered_ratio(0.8))
-	content.get_node("Buttons/Cancel").pressed.connect(_cancel)
-	content.get_node("Buttons/Generate").pressed.connect(_generate)
+	content.get_node("Buttons/Cancel").confirmed.connect(_cancel)
+	content.get_node("Buttons/Generate").confirmed.connect(_generate)
+	for name: String in ["Cancel", "Generate"]:
+		var button: HoldConfirmButton = content.get_node("Buttons/" + name)
+		button.hold_started.connect(_hold_started.bind(name))
+		button.confirmation_started.connect(_lock_confirmation)
 	content.get_node("TitleInput").text_changed.connect(func(_text: String) -> void: _update())
 	$Picker.files_selected.connect(_files_selected)
 	service.preview_finished.connect(_preview_finished)
@@ -27,8 +33,9 @@ func _ready() -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		_cancel()
 		get_viewport().set_input_as_handled()
+		if not _confirmation_locked:
+			content.get_node("Buttons/Cancel").grab_focus()
 
 func _input(event: InputEvent) -> void:
 	if _drag_index < 0 or event.device == InputEvent.DEVICE_ID_EMULATION:
@@ -74,6 +81,7 @@ func _process(delta: float) -> void:
 func _begin_drag(pointer: int, point: Vector2, index: int) -> void:
 	if _drag_index >= 0:
 		return
+	get_node("/root/UISounds").play_menu()
 	_drag_index = index
 	_drag_pointer = pointer
 	_drag_point = point
@@ -119,6 +127,25 @@ func _cancel() -> void:
 	dismissed.emit()
 	queue_free()
 
+func _hold_started(name: String) -> void:
+	var other: String = "Generate" if name == "Cancel" else "Cancel"
+	content.get_node("Buttons/" + other).cancel_hold()
+
+func _lock_confirmation() -> void:
+	_confirmation_locked = true
+	_cancel_drag()
+	content.get_node("Buttons/Cancel").disabled = true
+	content.get_node("Buttons/Generate").disabled = true
+	$Layer/Root/InputBlocker.show()
+	$Layer/Root/InputBlocker.grab_focus()
+
+func _unlock_confirmation() -> void:
+	_confirmation_locked = false
+	$Layer/Root/InputBlocker.hide()
+	content.get_node("Buttons/Cancel").reset_confirmation()
+	content.get_node("Buttons/Generate").reset_confirmation()
+	_update()
+
 func _files_selected(paths: PackedStringArray) -> void:
 	if paths.size() + photos.size() > 30:
 		content.get_node("Status").text = "Choose at most 30 photos in total."
@@ -160,15 +187,17 @@ func _rebuild() -> void:
 	for index: int in range(photos.size()):
 		var row: HBoxContainer = CARD.instantiate()
 		rows.add_child(row)
-		var image: Image = Image.load_from_file(str(photos[index].thumbnail))
+		var image: Image = Image.load_from_file(str(photos[index].get("photo", photos[index].thumbnail)))
 		if image != null:
 			row.get_node("Thumbnail").texture = ImageTexture.create_from_image(image)
 		row.get_node("Handle").grabbed.connect(_begin_drag.bind(index))
 		row.get_node("Handle").nudged.connect(_nudge.bind(index))
 		row.get_node("Remove").pressed.connect(_remove.bind(index))
 	_update()
+	_resize_photo_rows()
 
 func _nudge(direction: int, index: int) -> void:
+	get_node("/root/UISounds").play_menu()
 	_move(index, direction)
 
 func _move(index: int, direction: int) -> void:
@@ -185,16 +214,18 @@ func _remove(index: int) -> void:
 func _update() -> void:
 	content.get_node("Count").text = "%d / 30 PHOTOS  ·  DRAG ≡ TO REORDER" % photos.size()
 	content.get_node("Add").disabled = not preview_token.is_empty() or photos.size() >= 30
-	content.get_node("Buttons/Generate").disabled = photos.is_empty() or not preview_token.is_empty() or content.get_node("TitleInput").text.strip_edges().is_empty()
+	content.get_node("Buttons/Generate").disabled = _confirmation_locked or photos.is_empty() or not preview_token.is_empty() or content.get_node("TitleInput").text.strip_edges().is_empty()
 
 func _generate() -> void:
 	if content.get_node("Description").text.length() > 4000:
 		content.get_node("Status").text = "Keep the description under 4,000 characters."
+		_unlock_confirmation()
 		return
 	if service.start_generation(content.get_node("TitleInput").text, content.get_node("Description").text, photos):
 		_cancel()
 	else:
 		content.get_node("Status").text = service.message
+		_unlock_confirmation()
 
 func _layout_review() -> void:
 	var compact: bool = $Layer/Root.size.y < 780.0
@@ -203,3 +234,13 @@ func _layout_review() -> void:
 	content.get_node("Scroll").custom_minimum_size.y = 64 if compact else 90
 	content.get_node("Count").add_theme_font_size_override("font_size", 14 if compact else 16)
 	content.get_node("Disclosure").add_theme_font_size_override("font_size", 13 if compact else 14)
+
+func _resize_photo_rows() -> void:
+	var scroll: ScrollContainer = content.get_node("Scroll")
+	var gap: float = rows.get_theme_constant("separation")
+	var height: float = maxf(64, floorf((scroll.size.y - gap * 3) / 3.5))
+	var width: float = maxf(72, minf(height * 1.6, scroll.size.x - 188))
+	for child: Node in rows.get_children():
+		var row: HBoxContainer = child as HBoxContainer
+		row.custom_minimum_size.y = height
+		row.get_node("Thumbnail").custom_minimum_size = Vector2(width, height)
