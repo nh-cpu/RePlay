@@ -6,7 +6,7 @@ from pathlib import Path
 from . import __version__
 from .audio import analyze, import_audio, read_audio
 from .charting import CHART_VERSION
-from .dynamic_chart import build_chart
+from .dynamic_chart import build_chart, difficulty_notices
 from .models import AlbumProfile, Analysis, Chart
 from .photos import prepare_photos
 from .planning import make_plan
@@ -115,7 +115,10 @@ def finish(store: Store, source: Path, args, progress, metadata: dict):
             store.commit(name, key)
         validate(store.root / (name + ".json"))
         reports[name] = store.read_json(name + "_report.json")
-    store.write_json("chart_report.json", {"chart_version": CHART_VERSION, "difficulties": reports})
+    notices = difficulty_notices(reports)
+    for notice in notices:
+        progress("Difficulty notice: " + notice)
+    store.write_json("chart_report.json", {"chart_version": CHART_VERSION, "difficulties": reports, "notices": notices})
     store.write_json("generation_metadata.json", {
         **metadata,
         "version": __version__, "duration_seconds": analysis.duration, "bpm": analysis.bpm,

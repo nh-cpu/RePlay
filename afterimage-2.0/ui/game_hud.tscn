@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://cme1pssm103oi" path="res://ui/game_hud.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/pause.tres" id="2"]
 
+[ext_resource type="FontVariation" path="res://assets/fonts/outfit_bold.tres" id="bold"]
+
 [node name="HUD" type="Control" unique_id=2025895980]
 layout_mode = 3
 anchors_preset = 15
@@ -22,6 +24,7 @@ theme_override_font_sizes/font_size = 22
 text = "FIRST LIGHT"
 
 [node name="Score" type="Label" parent="." unique_id=1542685811]
+theme_override_fonts/font = ExtResource("bold")
 layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
@@ -67,11 +70,13 @@ offset_right = 252.72
 offset_bottom = 46.92
 
 [node name="Combo" type="Label" parent="Feedback" unique_id=1960802914]
+theme_override_fonts/font = ExtResource("bold")
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 
 [node name="Judgment" type="Label" parent="Feedback" unique_id=389083624]
+theme_override_fonts/font = ExtResource("bold")
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 horizontal_alignment = 1

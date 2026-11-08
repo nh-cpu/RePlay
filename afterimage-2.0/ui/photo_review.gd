@@ -11,6 +11,8 @@ var preview_folders: PackedStringArray = []
 @onready var rows: VBoxContainer = $Layer/Root/Panel/Margin/Content/Scroll/Photos
 
 func _ready() -> void:
+	$Layer/Root.resized.connect(_layout_review)
+	_layout_review.call_deferred()
 	content.get_node("Add").pressed.connect(func() -> void: $Picker.popup_centered_ratio(0.8))
 	content.get_node("Buttons/Cancel").pressed.connect(_cancel)
 	content.get_node("Buttons/Generate").pressed.connect(_generate)
@@ -92,7 +94,7 @@ func _remove(index: int) -> void:
 	_rebuild()
 
 func _update() -> void:
-	content.get_node("Count").text = "%d / 30 PHOTOS  •  Order sets the album story" % photos.size()
+	content.get_node("Count").text = "%d / 30 PHOTOS  /  YOUR ALBUM STORY" % photos.size()
 	content.get_node("Add").disabled = not preview_token.is_empty() or photos.size() >= 30
 	content.get_node("Buttons/Generate").disabled = photos.is_empty() or not preview_token.is_empty() or content.get_node("TitleInput").text.strip_edges().is_empty()
 
@@ -104,3 +106,12 @@ func _generate() -> void:
 		_cancel()
 	else:
 		content.get_node("Status").text = service.message
+
+func _layout_review() -> void:
+	var compact: bool = $Layer/Root.size.y < 780.0
+	content.add_theme_constant_override("separation", 6 if compact else 10)
+	content.get_node("Description").custom_minimum_size.y = 56 if compact else 76
+	content.get_node("Scroll").custom_minimum_size.y = 64 if compact else 90
+	content.get_node("Hint").add_theme_font_size_override("font_size", 14 if compact else 16)
+	content.get_node("Count").add_theme_font_size_override("font_size", 14 if compact else 16)
+	content.get_node("Disclosure").add_theme_font_size_override("font_size", 13 if compact else 14)

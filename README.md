@@ -188,6 +188,13 @@ is separate from automated verification.
 
 ## License
 
+The interface uses [Outfit](https://github.com/Outfitio/Outfit-Fonts), bundled
+under the SIL Open Font License in `afterimage-2.0/assets/fonts/OFL.txt`.
+Regular, Medium, SemiBold, and Bold share the same variable font. Menu atlas
+crops and nine-slice themes can be rebuilt with
+`python tools/build_menu_assets.py` (requires Pillow). The menu theme is separate
+from the gameplay theme; gameplay uses Outfit without changing lane or HUD layout.
+
 Copyright © 2026. All rights reserved.
 
 This repository is publicly available for viewing and hackathon evaluation purposes only.

@@ -63,13 +63,13 @@ def analyze(path: Path, device: str = "cpu", tracker=None) -> Analysis:
     signal = librosa.resample(mono, orig_sr=rate, target_sr=analysis_rate)
     hop = 256
     strength = librosa.onset.onset_strength(y=signal, sr=analysis_rate, hop_length=hop)
-    onset_frames = librosa.onset.onset_detect(onset_envelope=strength, sr=analysis_rate, hop_length=hop)
-    onsets = librosa.frames_to_time(onset_frames, sr=analysis_rate, hop_length=hop)
-    if len(onsets) < 4:
-        raise ValueError("Insufficient rhythmic information: fewer than four sound attacks")
     energy = librosa.feature.rms(y=signal, hop_length=hop)[0]
     # Separate sustained and transient components before choosing hold passages.
     harmonic, percussive = librosa.decompose.hpss(librosa.stft(signal, hop_length=hop))
+    from .events import detect_events
+    events = detect_events(signal, analysis_rate, beats, harmonic, percussive, hop)
+    if len(events) < 4:
+        raise ValueError("Insufficient rhythmic information: fewer than four sound attacks")
     harmonic_rms = librosa.feature.rms(S=np.abs(harmonic))[0]
     percussive_rms = librosa.feature.rms(S=np.abs(percussive))[0]
     length = min(len(strength), len(energy))
@@ -80,7 +80,11 @@ def analyze(path: Path, device: str = "cpu", tracker=None) -> Analysis:
     scale = max(float(energy.max()), 1e-9)
     result = Analysis(
         duration=duration, bpm=float(60 / np.median(np.diff(beats))), beats=beats.tolist(),
-        downbeats=downbeats.tolist(), onsets=onsets[onsets < duration].tolist(),
+        downbeats=downbeats.tolist(), onsets=[event.time for event in events], events=events,
+        pulse_support={str(factor): float(np.mean([
+            abs((event.beat_index + event.phase) * factor - round((event.beat_index + event.phase) * factor)) < .1
+            for event in events
+        ])) for factor in (.5, 1, 2)},
         feature_times=times[keep].tolist(), energy=(energy / scale).tolist(),
         onset_strength=(strength / max(float(strength.max()), 1e-9)).tolist(),
         harmonic_energy=(harmonic_rms[:length][keep] / scale).tolist(),

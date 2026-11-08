@@ -68,6 +68,18 @@ class MusicPlan(Model):
     prompt: str = Field(min_length=1, max_length=10000)
 
 
+class MusicalEvent(Model):
+    time: float = Field(ge=0)
+    strength: float = Field(ge=0, le=1)
+    confidence: float = Field(ge=0, le=1)
+    components: list[str]
+    compound: bool = False
+    sustain_end: float | None = None
+    beat_index: int = Field(ge=0)
+    phase: float
+    rhythm: str
+
+
 class Analysis(Model):
     duration: float = Field(gt=0)
     bpm: float = Field(gt=0)
@@ -85,9 +97,17 @@ class Analysis(Model):
     beat_harmonic: list[float] = Field(default_factory=list)
     musical_change: list[float] = Field(default_factory=list)
     detector: str = "beat-this/final0"
+    events: list[MusicalEvent] = Field(default_factory=list)
+    pulse_support: dict[str, float] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def valid_timeline(self):
+        for event in self.events:
+            if event.time >= self.duration or (event.sustain_end is not None and
+                    not event.time < event.sustain_end <= self.duration):
+                raise ValueError("Musical event outside audio timeline")
+        if any(a.time >= b.time for a, b in zip(self.events, self.events[1:])):
+            raise ValueError("Musical events must be strictly increasing")
         for name in ("beats", "downbeats", "onsets", "feature_times"):
             values = getattr(self, name)
             if any(t < 0 or t > self.duration for t in values):

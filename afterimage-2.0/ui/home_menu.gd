@@ -9,12 +9,14 @@ var charts: Array[ChartData] = []
 var tracks: Array[Dictionary] = []
 var selected_track: int = 0
 var review: Node2D
-@onready var list: ItemList = $Margin/Content/Levels
+@onready var list: ItemList = $Margin/Content/LibraryPanel/Levels
 @onready var detail: Label = $Margin/Content/Detail
 @onready var status: Label = $Margin/Content/Status
 @onready var difficulty: OptionButton = $Margin/Content/Options/Difficulty
 
 func _ready() -> void:
+	resized.connect(_layout_menu)
+	_layout_menu()
 	$Margin/Content/Buttons/Play.pressed.connect(_play)
 	$Margin/Content/Buttons/Create.pressed.connect(_open_review)
 	list.item_selected.connect(_selection_changed)
@@ -74,3 +76,8 @@ func _job_changed() -> void:
 	status.text = service.message
 	$Margin/Content/Buttons/Create.disabled = service.busy
 	$Margin/Content/Retry.visible = not service.busy and not service.active_job.is_empty()
+
+func _layout_menu() -> void:
+	var inset: int = int(maxf(24.0, (size.x - 820.0) / 2.0))
+	$Margin.add_theme_constant_override("margin_left", inset)
+	$Margin.add_theme_constant_override("margin_right", inset)

@@ -161,30 +161,42 @@ they are visual sequencing intentions, not detected musical boundaries.
 Consecutive repetitions of the same photo merge into one uninterrupted cue.
 The v1 beatmaps remain byte-for-byte pipeline outputs.
 
-Charts use four-bar phrases anchored to detected downbeats, falling back to
-16-beat phrases when downbeats are unavailable. Song-relative energy and attack
-density determine intensity. Patterns include alternating hands, runs, mirrored
-movement, call-and-response, chord accents, and hold-led passages. Similar passages
-can recall a motif with variations; adjacent pattern families are different.
-Intensity follows the audio rather than elapsed time. Reports expose exact phrase
-repetitions so sparse or unusual songs can be reviewed.
+Charts select measured musical events before assigning lanes. Low/mid/high
+frequency attacks and harmonic/percussive components supply evidence, with local
+thresholds and signal-based timing refinement. Beats provide context; they never
+create notes without an attack. Straight, triplet, swung, and off-grid events keep
+their measured timestamps. Four-bar phrases (or a 16-beat fallback) describe the
+recording in reports. Repeated music may retain repeated lane motifs.
 
 | Difficulty | Vocabulary | Maximum starts in a half-open rolling second |
 |---|---|---:|
-| Easy | Quarter notes, half-time passages, rests, two-beat holds; no chords | 2 |
-| Normal | Eighth notes, offbeats, two-note chords, two- to four-beat holds | 4 |
-| Hard | Eighth notes, selected sixteenth bursts, syncopation, two-note chords, holds with other notes | 8 |
+| Easy | Dominant pulse, strong accents, supported holds up to two beats; no chords | 2 |
+| Normal | Eighth notes, swing/triplets, offbeats, supported chords and holds up to four beats | 4 |
+| Hard | Additional reliable attacks, continuous sixteenths, syncopation, supported chords and holds | 8 |
 
-Subdivisions require nearby detected sound attacks; quiet music is not filled
-with arbitrary fast notes. Hard bursts last at most two beats followed by at least
-two beats without sixteenth-note streams. Chords count as two starts. At most two
+Stronger evidenced accents win selection conflicts. Hard follows sustained fast
+passages when supported; no fixed burst/recovery cycle interrupts the music.
+Chords require distinct coincident component evidence, not merely a downbeat or
+broadband hit. Chords count as two starts. At most two
 keys are required simultaneously, including held notes. Same-lane reuse gaps are
 120 ms on Easy/Normal and 90 ms on Hard.
 
-All charts leave two seconds before the first note and include phrase-ending
-rests. Harmonic/percussive separation helps select holds over sustained backing
-even with drums. Holds last at most four seconds and do not cross phrase endings;
-this remains an audio-feature heuristic, not melody transcription.
+All charts leave two seconds before the first note. Breathing room follows audible
+gaps rather than mandatory phrase-ending rests. Holds require a harmonic entrance,
+continuation, and release evidence; unchanged background energy cannot repeatedly
+create holds. This remains an audio-feature heuristic, not instrument transcription.
+
+Reports link every note to its source event and record confidence, rhythm,
+chord/hold evidence, rejection reasons, density, and difficulty overlap. If a chart
+adds fewer than 15% new attack timestamps over the preceding difficulty and fewer
+than 10% of its notes add hold/chord coordination, the terminal prints an advisory
+on both fresh and cached runs. Sparse songs still export without filler notes.
+These diagnostics are not calibrated human difficulty ratings.
+
+Use `rechart --output <existing-folder>` to apply new detection and selection to
+saved audio without paid requests. This upgrade invalidates analysis/chart caches
+only. Re-import the resulting JSON into Godot: previously imported copies do not
+update automatically. Listen and playtest before judging musical fidelity.
 
 Actual audio is the timing authority. A representative BPM is stored for the
 v1 importer, but `beat = timestamp_seconds * bpm / 60` encodes each measured event
@@ -213,7 +225,9 @@ all three charts to evaluate musical relevance, beat-detection accuracy, and com
 
 The long-song tests cover 180- and 240-second synthetic feature timelines with
 breakdowns, builds and recurring themes, as well as density, active-key limits,
-subdivision evidence and burst recovery. To test exports against the real Godot
+subdivision evidence and continuous supported streams. Waveform tests additionally
+cover swing, triplets, quiet attacks, offbeats, sustained tones, broadband hits,
+noise, and tempo drift. To test exports against the real Godot
 loader and judgment controller, substitute your Godot executable:
 
 ```powershell
@@ -222,6 +236,16 @@ godot --headless --path afterimage-2.0 --script ../level-generation/tests/godot_
 
 This simulates perfect input for every note across the entire song; it does not
 replace a human listening/playability review.
+
+To prepare 15-second opening, middle, breakdown, and climax excerpts with chart
+clicks for all three difficulties (use an empty review destination):
+
+```powershell
+& ./level-generation/.venv/Scripts/python.exe ./level-generation/tools/review_charts.py ./level-generation/outputs/gundum-dynamic ./level-generation/outputs/review-dynamic
+```
+
+The clips keep original event timing and use different click pitches for lanes.
+They are listening aids; the saved song and charts are not modified.
 
 Provider and algorithm references:
 [Gemini structured output](https://ai.google.dev/gemini-api/docs/structured-output),

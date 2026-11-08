@@ -41,6 +41,9 @@ func _run() -> void:
 	await _shot("album_review_landscape")
 	DisplayServer.window_set_size(Vector2i(480, 850))
 	await _shot("album_review_portrait")
+	DisplayServer.window_set_size(Vector2i(480, 720))
+	await _shot("album_review_compact")
+	DisplayServer.window_set_size(Vector2i(480, 850))
 	review._cancel()
 	await process_frame
 	var album: AlbumData = AlbumData.new()

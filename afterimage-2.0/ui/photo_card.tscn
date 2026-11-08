@@ -1,4 +1,8 @@
 [gd_scene format=3]
+[ext_resource type="Texture2D" path="res://assets/menu/back.tres" id="back"]
+[ext_resource type="Texture2D" path="res://assets/menu/play.tres" id="next"]
+[ext_resource type="Texture2D" path="res://assets/menu/close.tres" id="close"]
+
 [node name="PhotoCard" type="HBoxContainer"]
 theme_override_constants/separation = 6
 custom_minimum_size = Vector2(0, 72)
@@ -14,16 +18,28 @@ clip_text = true
 theme_override_font_sizes/font_size = 14
 [node name="Earlier" type="Button" parent="."]
 layout_mode = 2
-text = "‹"
+theme_type_variation = &"IconButton"
+tooltip_text = "Move photo earlier"
+icon = ExtResource("back")
+expand_icon = true
+theme_override_constants/icon_max_width = 18
 custom_minimum_size = Vector2(40, 44)
-focus_mode = 0
+focus_mode = 2
 [node name="Later" type="Button" parent="."]
 layout_mode = 2
-text = "›"
+theme_type_variation = &"IconButton"
+tooltip_text = "Move photo later"
+icon = ExtResource("next")
+expand_icon = true
+theme_override_constants/icon_max_width = 18
 custom_minimum_size = Vector2(40, 44)
-focus_mode = 0
+focus_mode = 2
 [node name="Remove" type="Button" parent="."]
 layout_mode = 2
-text = "×"
+theme_type_variation = &"IconButton"
+tooltip_text = "Remove photo from this album"
+icon = ExtResource("close")
+expand_icon = true
+theme_override_constants/icon_max_width = 18
 custom_minimum_size = Vector2(40, 44)
-focus_mode = 0
+focus_mode = 2

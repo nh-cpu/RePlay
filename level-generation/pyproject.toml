@@ -9,7 +9,7 @@ description = "Photo albums to music and AFTERIMAGE rhythm charts"
 requires-python = ">=3.11,<3.12"
 dependencies = [
   "google-genai==1.56.0", "httpx==0.28.1", "pydantic==2.12.5",
-  "Pillow==11.3.0", "numpy==2.2.6", "soundfile==0.13.1",
+  "Pillow==11.3.0", "numpy==2.2.6", "soundfile==0.13.1", "scipy==1.17.1",
   "librosa==0.11.0", "torch==2.6.0", "torchaudio==2.6.0",
   "beat-this==1.1.0",
 ]

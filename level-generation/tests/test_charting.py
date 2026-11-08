@@ -9,6 +9,7 @@ from afterimage_levelgen.audio import analyze
 from afterimage_levelgen.charting import hold_end, make_chart
 from afterimage_levelgen.models import Chart
 from afterimage_levelgen.pipeline import validate
+from afterimage_levelgen.events import onset_candidates
 
 
 @pytest.mark.parametrize("difficulty,cap", [("Easy", 2), ("Normal", 4)])
@@ -28,6 +29,9 @@ def test_patterns_limits_and_reproducibility(analysis, difficulty, cap):
 
 def test_holds_reserve_lanes(analysis):
     analysis.onsets = [0.3, 2.3, 10.3, 18.3]
+    analysis.events = onset_candidates(analysis)
+    for event in analysis.events:
+        event.sustain_end = min(event.time + 2, 19.9)
     chart = make_chart(analysis, "Normal", "Sustained", 42)
     assert any(n.type == "hold" for n in chart.notes)
     chart.check_timing(analysis.duration)
@@ -38,6 +42,8 @@ def test_holds_reserve_lanes(analysis):
 
 @pytest.mark.parametrize("difficulty,length", [("Easy", 2), ("Normal", 4)])
 def test_sustained_backing_with_drums_produces_holds(analysis, difficulty, length):
+    analysis.events = onset_candidates(analysis)
+    analysis.events[8].sustain_end = 4.3
     chart = make_chart(analysis, difficulty, "Backing with drums", 42)
     holds = [n for n in chart.notes if n.type == "hold"]
     assert holds
@@ -76,7 +82,8 @@ def test_click_track_timestamps(tmp_path, delay, variable):
     assert chart.notes
     for note in chart.notes:
         reconstructed = chart.offset_seconds + note.beat * 60 / chart.bpm
-        assert min(abs(reconstructed - beats)) < 0.001
+        assert min(abs(reconstructed - beats)) < 0.03
+        assert min(abs(reconstructed - event.time) for event in result.events) < .001
     assert np.allclose(result.beats, beats)
 
 
