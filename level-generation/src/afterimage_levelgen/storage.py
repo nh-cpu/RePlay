@@ -6,8 +6,6 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 
-from . import __version__
-
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -18,7 +16,8 @@ def json_bytes(value) -> bytes:
 
 
 def stage_key(stage: str, inputs) -> str:
-    return digest(json_bytes({"version": __version__, "stage": stage, "inputs": inputs}))
+    # Versions belong to individual stages so chart edits never invalidate music.
+    return digest(json_bytes({"cache_format": 2, "stage": stage, "inputs": inputs}))
 
 
 class Store:

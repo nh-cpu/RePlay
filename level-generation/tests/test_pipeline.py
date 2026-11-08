@@ -42,7 +42,9 @@ def test_bad_albums(tmp_path, kind):
 def test_plan_groups_and_duration(album):
     plan = make_plan(album, 120, "electronic")
     assert sum(s.duration_seconds for s in plan.sections) == 120
-    assert [p for s in plan.sections for p in s.photo_ids] == [0, 1]
+    ids = [p for s in plan.sections for p in s.photo_ids]
+    assert set(ids) == {0, 1} and ids == sorted(ids)
+    assert len(plan.sections) == 4
     assert "No vocals" in plan.prompt
     assert plan.sections[0].energy < plan.sections[-1].energy
 
@@ -123,7 +125,7 @@ def test_full_pipeline_mocked_providers(tmp_path, audio_path, analysis, album, m
 
 def test_cli_defaults_and_invalid_settings(tmp_path):
     args = parser().parse_args(["generate", "--photos", "photos", "--output", "out"])
-    assert args.duration == 120 and args.seed == 42 and args.device == "cpu"
+    assert args.duration is None and args.style is None and args.seed == 42 and args.device == "cpu"
     assert main(["generate", "--photos", "photos", "--output", str(tmp_path), "--duration", "nan"]) == 1
     assert main(["chart", "--audio", "missing.wav", "--output", str(tmp_path), "--seed", "0"]) == 1
 

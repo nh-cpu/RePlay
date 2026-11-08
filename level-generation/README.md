@@ -1,7 +1,7 @@
 # AFTERIMAGE photo-to-level CLI
 
-This standalone Python 3.11 tool produces `song.wav`, `easy.json`, and
-`normal.json` for the game's existing **Import JSON** action. It does not change
+This standalone Python 3.11 tool produces `song.wav`, `easy.json`, `normal.json`,
+and `hard.json` for the game's existing **Import JSON** action. It does not change
 Godot, deploy a service, or add an upload interface to the game.
 
 ## Windows setup
@@ -51,7 +51,7 @@ Set credentials in your shell (do not commit them):
 ```powershell
 $env:GEMINI_API_KEY = 'your-key'
 $env:STABILITY_API_KEY = 'your-key'
-$env:GEMINI_MODEL = 'gemini-2.5-flash'
+$env:GEMINI_MODEL = 'gemini-3.8-flash'
 & ./level-generation/.venv/Scripts/python.exe -m afterimage_levelgen generate --photos ./level-generation/photos/trip --output ./level-generation/outputs/trip --title 'Our Trip' --description 'A calm beach morning ending in a city celebration'
 ```
 
@@ -60,11 +60,25 @@ providers require accounts with suitable API access. Gemini receives resized,
 orientation-corrected JPEG copies without EXIF metadata. Stable Audio receives
 the musical prompt, not the photos. Original photos remain untouched.
 
-Defaults: 120-second instrumental electronic music, seed 42, CPU analysis, Easy
-and Normal charts. Optional flags: `--duration` (10–380 seconds), `--style`,
+Defaults: photo-inspired instrumental music, seed 42, CPU analysis, and all three
+difficulties. Gemini chooses a cohesive genre, instruments, tempo, theme groups,
+and emotional progression. Electronic music is one possibility, not a fixed default.
+
+Automatic duration is `min(240, 95 + 5 * max(photo_count - 4, 0) + 10 * (distinct_theme_count - 1))`
+seconds. Similar scenes share themes, including when they recur later. Small,
+single-theme albums start at 95 seconds. The plan records the calculation and
+any overrides. Four sections are planned through 120 seconds, six through 180,
+and eight above 180, with contrasting passages, evolving motifs, and a resolution.
+
+Optional flags: `--duration` (10–240 seconds), `--style`,
 `--description`, `--title`, `--gemini-model`, `--seed`, `--chart-seed`, `--device`.
 Seed 0 is rejected because Stability treats it as random. Provider seeds do not
 guarantee identical audio across future model revisions; cached audio is definitive.
+
+Explicit duration/style override the automatic choices. Requested duration is
+limited to four minutes. A provider recording exceeding 240 seconds is saved but
+rejected for album export without automatic regeneration. Existing-audio `chart`
+and `rechart` commands accept longer songs.
 
 The music provider uses Stable Audio 3's asynchronous official endpoint. Job IDs
 are saved before polling, and interrupted downloads resume on the next invocation.
@@ -91,30 +105,61 @@ Artifacts:
 - `music_plan.json`: photo groups, energy, instruments, and the exact prompt.
 - `music_job.json`: saved provider job state, without credentials.
 - `generated.wav`: unmodified provider response (album mode).
-- `song.wav`: game-compatible audio shared by both charts.
-- `audio_analysis.json`: beat/downbeat/onset timestamps and energy features.
-- `easy.json`, `normal.json`: game format version 1, with relative `song.wav` paths.
+- `song.wav`: game-compatible audio shared by all charts.
+- `audio_analysis.json`: timestamps, harmonic/percussive measurements, beat-synchronized features, and change scores.
+- `easy.json`, `normal.json`, `hard.json`: game format version 1, with relative `song.wav` paths.
+- `chart_report.json`: per-difficulty phrase boundaries, intensity, pattern choices, counts, repetition measurements, and event timing.
+- `easy_report.json`, `normal_report.json`, `hard_report.json`: individually cached difficulty reports.
 - `generation_metadata.json`: stage fingerprints, versions, and chart settings.
 
 Keep input photos under `level-generation/photos/` and outputs under
 `level-generation/outputs/` so Git ignores them. Arbitrary folders elsewhere in
 the repository are not automatically ignored.
 
-Change `--chart-seed` or `--title` to rebuild charts without another music call.
+To upgrade existing generations without calling either API:
+
+```powershell
+& ./level-generation/.venv/Scripts/python.exe -m afterimage_levelgen rechart --output ./level-generation/outputs/gundum-test
+```
+
+`rechart` preserves album/music metadata, title, chart seed, and saved audio. It
+updates outdated analysis locally and rebuilds all three charts and their reports.
+It also accepts `--chart-seed`, `--title`, and `--device`. Album, music-plan,
+analysis, and chart versions are independent; chart changes cannot invalidate
+paid music generation. Use `rechart` for old albums instead of `generate` when
+you want to keep the song. The upgraded music planner will request new music
+when you run `generate` with the new album interpretation and arrangement.
+
+Change `--chart-seed` or `--title` to rebuild current-version charts without another music call.
 Changing `--seed` in album mode changes the music generation request too. Copy
 the whole output folder when moving a level; the JSON files expect `song.wav`
-beside them. Import either chart through Godot's **Import JSON** button.
+beside them. Import any chart through Godot's **Import JSON** button. Previously
+imported levels are copied into Godot's library, so re-import after recharting.
 
-Easy uses quarter-note patterns without chords, with at most two note starts
-in any half-open one-second window. Normal adds selected local half-beat attacks
-and occasional downbeat chords, capped at four starts in the same window. Both
-leave at least two seconds before the first note, insert phrase rests, and use
-two-beat holds on Easy and up to four-beat holds on Normal when the mix has
-sustained energy, even with drums underneath. Holds start on detected downbeats
-(every fourth beat when downbeats are unavailable), at least eight beats apart,
-and last at most four seconds. This is a mix-energy heuristic, not melody-note
-transcription; isolated percussive clicks do not qualify. Held lanes are reserved
-through release, with an additional reuse gap. Chords count as two starts.
+Charts use four-bar phrases anchored to detected downbeats, falling back to
+16-beat phrases when downbeats are unavailable. Song-relative energy and attack
+density determine intensity. Patterns include alternating hands, runs, mirrored
+movement, call-and-response, chord accents, and hold-led passages. Similar passages
+can recall a motif with variations; adjacent pattern families are different.
+Intensity follows the audio rather than elapsed time. Reports expose exact phrase
+repetitions so sparse or unusual songs can be reviewed.
+
+| Difficulty | Vocabulary | Maximum starts in a half-open rolling second |
+|---|---|---:|
+| Easy | Quarter notes, half-time passages, rests, two-beat holds; no chords | 2 |
+| Normal | Eighth notes, offbeats, two-note chords, two- to four-beat holds | 4 |
+| Hard | Eighth notes, selected sixteenth bursts, syncopation, two-note chords, holds with other notes | 8 |
+
+Subdivisions require nearby detected sound attacks; quiet music is not filled
+with arbitrary fast notes. Hard bursts last at most two beats followed by at least
+two beats without sixteenth-note streams. Chords count as two starts. At most two
+keys are required simultaneously, including held notes. Same-lane reuse gaps are
+120 ms on Easy/Normal and 90 ms on Hard.
+
+All charts leave two seconds before the first note and include phrase-ending
+rests. Harmonic/percussive separation helps select holds over sustained backing
+even with drums. Holds last at most four seconds and do not cross phrase endings;
+this remains an audio-feature heuristic, not melody transcription.
 
 Actual audio is the timing authority. A representative BPM is stored for the
 v1 importer, but `beat = timestamp_seconds * bpm / 60` encodes each measured event
@@ -139,7 +184,19 @@ audio to test analysis/export timing. The synthetic timing tests supply exact be
 timestamps to isolate clock conversion from machine-learning accuracy. Run the
 demo command above to exercise the real pretrained detector. A live album test
 requires credentials and is separate from the automated suite. Listen and play
-both charts to evaluate musical relevance, beat-detection accuracy, and comfort.
+all three charts to evaluate musical relevance, beat-detection accuracy, and comfort.
+
+The long-song tests cover 180- and 240-second synthetic feature timelines with
+breakdowns, builds and recurring themes, as well as density, active-key limits,
+subdivision evidence and burst recovery. To test exports against the real Godot
+loader and judgment controller, substitute your Godot executable:
+
+```powershell
+godot --headless --path afterimage-2.0 --script ../level-generation/tests/godot_chart_check.gd -- 'C:/absolute/path/to/generation-folder'
+```
+
+This simulates perfect input for every note across the entire song; it does not
+replace a human listening/playability review.
 
 Provider and algorithm references:
 [Gemini structured output](https://ai.google.dev/gemini-api/docs/structured-output),

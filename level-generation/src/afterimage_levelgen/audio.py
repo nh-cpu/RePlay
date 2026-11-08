@@ -68,14 +68,50 @@ def analyze(path: Path, device: str = "cpu", tracker=None) -> Analysis:
     if len(onsets) < 4:
         raise ValueError("Insufficient rhythmic information: fewer than four sound attacks")
     energy = librosa.feature.rms(y=signal, hop_length=hop)[0]
+    # Separate sustained and transient components before choosing hold passages.
+    harmonic, percussive = librosa.decompose.hpss(librosa.stft(signal, hop_length=hop))
+    harmonic_rms = librosa.feature.rms(S=np.abs(harmonic))[0]
+    percussive_rms = librosa.feature.rms(S=np.abs(percussive))[0]
     length = min(len(strength), len(energy))
     times = librosa.frames_to_time(np.arange(length), sr=analysis_rate, hop_length=hop)
     keep = times < duration
     energy = energy[:length][keep]
     strength = strength[:length][keep]
-    return Analysis(
+    scale = max(float(energy.max()), 1e-9)
+    result = Analysis(
         duration=duration, bpm=float(60 / np.median(np.diff(beats))), beats=beats.tolist(),
         downbeats=downbeats.tolist(), onsets=onsets[onsets < duration].tolist(),
-        feature_times=times[keep].tolist(), energy=(energy / max(float(energy.max()), 1e-9)).tolist(),
+        feature_times=times[keep].tolist(), energy=(energy / scale).tolist(),
         onset_strength=(strength / max(float(strength.max()), 1e-9)).tolist(),
+        harmonic_energy=(harmonic_rms[:length][keep] / scale).tolist(),
+        percussive_activity=(percussive_rms[:length][keep] / scale).tolist(),
     )
+    return beat_features(result)
+
+
+def beat_features(analysis: Analysis) -> Analysis:
+    """Aggregate measurements over actual local beat intervals, not nominal BPM."""
+    times = np.asarray(analysis.feature_times)
+    attacks = np.asarray(analysis.onsets)
+    result = analysis.model_copy(deep=True)
+    result.beat_energy, result.beat_onset_density = [], []
+    result.beat_harmonic, result.beat_percussion = [], []
+    for i, start in enumerate(analysis.beats):
+        end = analysis.beats[i + 1] if i + 1 < len(analysis.beats) else analysis.duration
+        left, right = np.searchsorted(times, [start, end])
+        right = max(left + 1, right)
+        def average(values):
+            if not values:
+                return 0.0
+            segment = values[left:right]
+            return float(np.mean(segment)) if segment else float(values[-1])
+        result.beat_energy.append(average(analysis.energy))
+        result.beat_harmonic.append(average(analysis.harmonic_energy))
+        result.beat_percussion.append(average(analysis.percussive_activity))
+        result.beat_onset_density.append(float(np.sum((attacks >= start) & (attacks < end))) / max(end - start, 0.001))
+    features = np.array([result.beat_energy, result.beat_onset_density,
+                         result.beat_harmonic, result.beat_percussion]).T
+    scales = np.maximum(np.max(features, axis=0), 1e-9)
+    features /= scales
+    result.musical_change = [0.0] + np.mean(np.abs(np.diff(features, axis=0)), axis=1).tolist()
+    return Analysis.model_validate(result.model_dump())

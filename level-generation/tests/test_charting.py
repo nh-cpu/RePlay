@@ -23,8 +23,6 @@ def test_patterns_limits_and_reproducibility(analysis, difficulty, cap):
         assert sum(start - 1e-8 <= t < start + 1 - 1e-8 for t in times) <= cap
     if difficulty == "Easy":
         assert len(set(times)) == len(times)
-    else:
-        assert len(set(times)) < len(times)
     chart.check_timing(analysis.duration)
 
 

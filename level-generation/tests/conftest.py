@@ -2,15 +2,18 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from afterimage_levelgen.models import AlbumProfile, Analysis, PhotoProfile
+from afterimage_levelgen.models import AlbumProfile, Analysis, PhotoProfile, Theme
 
 
 @pytest.fixture
 def album():
     return AlbumProfile(summary="A beach trip that becomes a celebration", photos=[
-        PhotoProfile(photo_id=0, scene="beach", palette=["blue"], atmosphere="peaceful", activity=0.2),
-        PhotoProfile(photo_id=1, scene="city", palette=["orange"], atmosphere="excited", activity=0.8),
-    ])
+        PhotoProfile(photo_id=0, theme_id=0, scene="beach", palette=["blue"], atmosphere="peaceful", activity=0.2),
+        PhotoProfile(photo_id=1, theme_id=1, scene="city", palette=["orange"], atmosphere="excited", activity=0.8),
+    ], themes=[Theme(theme_id=0, name="Coast", description="Peaceful coast"),
+               Theme(theme_id=1, name="City", description="Lively city")],
+        suggested_genre="acoustic folk", instruments=["guitar", "piano", "hand percussion"],
+        target_bpm=110, emotional_progression=["Reflective", "Celebratory"])
 
 
 @pytest.fixture

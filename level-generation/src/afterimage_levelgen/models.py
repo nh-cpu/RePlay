@@ -12,15 +12,36 @@ class Model(BaseModel):
 
 class PhotoProfile(Model):
     photo_id: int = Field(ge=0)
+    theme_id: int = Field(ge=0)
     scene: str = Field(min_length=1, max_length=300)
     palette: list[str] = Field(min_length=1, max_length=8)
     atmosphere: str = Field(min_length=1, max_length=300)
     activity: float = Field(ge=0, le=1)
 
 
+class Theme(Model):
+    theme_id: int = Field(ge=0)
+    name: str = Field(min_length=1, max_length=100)
+    description: str = Field(min_length=1, max_length=400)
+
+
 class AlbumProfile(Model):
     summary: str = Field(min_length=1, max_length=1000)
     photos: list[PhotoProfile] = Field(min_length=1, max_length=30)
+    themes: list[Theme] = Field(min_length=1, max_length=30)
+    suggested_genre: str = Field(min_length=1, max_length=200)
+    instruments: list[str] = Field(min_length=2, max_length=8)
+    target_bpm: float = Field(ge=60, le=180)
+    emotional_progression: list[str] = Field(min_length=2, max_length=8)
+
+    @model_validator(mode="after")
+    def complete_groups(self):
+        if [p.photo_id for p in self.photos] != list(range(len(self.photos))):
+            raise ValueError("Photos must cover consecutive IDs in album order")
+        ids = [theme.theme_id for theme in self.themes]
+        if len(set(ids)) != len(ids) or set(ids) != {p.theme_id for p in self.photos}:
+            raise ValueError("Each photo must reference one theme; themes must be unique and used")
+        return self
 
 
 class Section(Model):
@@ -31,12 +52,18 @@ class Section(Model):
     energy: float = Field(ge=0, le=1)
     intention: str
     instruments: list[str]
+    rhythm: str
+    transition: str
 
 
 class MusicPlan(Model):
     style: str
     target_bpm: float = Field(gt=0)
-    duration_seconds: float = Field(ge=10, le=380)
+    duration_seconds: float = Field(ge=10, le=240)
+    duration_reason: str
+    distinct_theme_count: int = Field(ge=1)
+    duration_override: bool
+    style_override: bool
     sections: list[Section]
     prompt: str = Field(min_length=1, max_length=10000)
 
@@ -50,6 +77,13 @@ class Analysis(Model):
     feature_times: list[float]
     energy: list[float]
     onset_strength: list[float]
+    harmonic_energy: list[float] = Field(default_factory=list)
+    percussive_activity: list[float] = Field(default_factory=list)
+    beat_energy: list[float] = Field(default_factory=list)
+    beat_onset_density: list[float] = Field(default_factory=list)
+    beat_percussion: list[float] = Field(default_factory=list)
+    beat_harmonic: list[float] = Field(default_factory=list)
+    musical_change: list[float] = Field(default_factory=list)
     detector: str = "beat-this/final0"
 
     @model_validator(mode="after")
@@ -66,6 +100,14 @@ class Analysis(Model):
             len(self.feature_times) == len(self.energy) == len(self.onset_strength)
         ):
             raise ValueError("Feature arrays must be nonempty and aligned")
+        for name in ("harmonic_energy", "percussive_activity"):
+            values = getattr(self, name)
+            if values and len(values) != len(self.feature_times):
+                raise ValueError(f"{name} must align with feature_times")
+        for name in ("beat_energy", "beat_onset_density", "beat_percussion", "beat_harmonic", "musical_change"):
+            values = getattr(self, name)
+            if values and len(values) != len(self.beats):
+                raise ValueError(f"{name} must align with beats")
         return self
 
 
