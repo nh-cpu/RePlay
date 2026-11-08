@@ -39,6 +39,26 @@ func _run() -> void:
 	watch.clock.time = 15.0
 	watch._process(0.0)
 	check(watch.album.first.get_rect() != before, "Photos pan as audio time advances")
+	watch._show_controls()
+	watch._process(2.9)
+	check(not watch._controls_hidden, "Controls remain visible before three idle seconds")
+	watch._process(0.11)
+	await create_timer(0.25).timeout
+	check(not watch.get_node("Controls").visible, "Controls disappear after idle timeout")
+	var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+	motion.relative = Vector2(4, 0)
+	watch._input(motion)
+	check(watch.get_node("Controls").visible and watch.get_node("Controls").modulate.a == 1.0, "Mouse movement immediately restores controls")
+	watch._process(3.1)
+	watch._input(motion)
+	await create_timer(0.25).timeout
+	check(watch.get_node("Controls").visible, "Input interrupts an in-progress fade")
+	watch._process(3.1)
+	await create_timer(0.25).timeout
+	var tap: InputEventScreenTouch = InputEventScreenTouch.new()
+	tap.pressed = true
+	watch._input(tap)
+	check(not watch._controls_hidden, "Touch reveals controls")
 	watch.toggle_pause()
 	check(watch.paused and watch.clock.frozen and watch.music.stream_paused, "Pause freezes audio and photo clock")
 	var frozen: float = watch.clock.time

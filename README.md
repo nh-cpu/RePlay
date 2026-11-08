@@ -15,6 +15,9 @@ Choose **Watch Mode** on the left of song selection to listen with animated albu
 photos and no notes or scoring. Pause/resume with its button, Escape, or Enter;
 focus loss pauses playback. Use Replay when the track ends, or Back to return.
 Watch Mode shows photos independently of the gameplay Album background toggle.
+Its translucent controls fade away after three seconds without input and return
+on mouse movement, touch, keyboard, or controller input. A first tap on hidden
+controls only reveals them.
 
 The song wheel supports mouse-wheel scrolling, click/drag, and touch dragging
 with inertia and snapping. **Up/down** or the controller D-pad/left stick browses
