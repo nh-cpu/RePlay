@@ -5,7 +5,7 @@ from pathlib import Path
 
 from . import __version__
 from .audio import analyze, import_audio, read_audio
-from .charting import make_chart
+from .charting import CHART_VERSION, make_chart
 from .models import AlbumProfile, Analysis, Chart
 from .photos import prepare_photos
 from .planning import make_plan
@@ -87,7 +87,7 @@ def finish(store: Store, source: Path, args, progress, metadata: dict):
     for difficulty in ("Easy", "Normal"):
         name = difficulty.lower()
         key = stage_key("chart", {"analysis": analysis_key, "difficulty": difficulty,
-                                   "seed": chart_seed, "title": title})
+                                   "seed": chart_seed, "title": title, "chart_version": CHART_VERSION})
         if not store.cached(name, key, name + ".json"):
             result = make_chart(analysis, difficulty, title, chart_seed)
             store.write_json(name + ".json", result.model_dump(exclude_none=True))
@@ -95,7 +95,7 @@ def finish(store: Store, source: Path, args, progress, metadata: dict):
         validate(store.root / (name + ".json"))
     store.write_json("generation_metadata.json", {
         "version": __version__, "duration_seconds": analysis.duration, "bpm": analysis.bpm,
-        "chart_seed": chart_seed, "audio_key": audio_key, "analysis_key": analysis_key,
+        "chart_seed": chart_seed, "chart_version": CHART_VERSION, "audio_key": audio_key, "analysis_key": analysis_key,
         "photos": [p.photo_id for p in AlbumProfile.model_validate(store.read_json("album_profile.json")).photos]
                   if args.command == "generate" else [], **metadata,
     })

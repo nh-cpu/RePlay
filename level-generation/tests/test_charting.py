@@ -6,7 +6,7 @@ import soundfile as sf
 from pydantic import ValidationError
 
 from afterimage_levelgen.audio import analyze
-from afterimage_levelgen.charting import make_chart
+from afterimage_levelgen.charting import hold_end, make_chart
 from afterimage_levelgen.models import Chart
 from afterimage_levelgen.pipeline import validate
 
@@ -36,6 +36,28 @@ def test_holds_reserve_lanes(analysis):
     for hold in [n for n in chart.notes if n.type == "hold"]:
         assert not any(n is not hold and n.lane == hold.lane
                        and hold.beat <= n.beat <= hold.beat + hold.duration_beats for n in chart.notes)
+
+
+@pytest.mark.parametrize("difficulty,length", [("Easy", 2), ("Normal", 4)])
+def test_sustained_backing_with_drums_produces_holds(analysis, difficulty, length):
+    chart = make_chart(analysis, difficulty, "Backing with drums", 42)
+    holds = [n for n in chart.notes if n.type == "hold"]
+    assert holds
+    assert holds[0].duration_beats == pytest.approx(length)
+    chart.check_timing(analysis.duration)
+    for note in holds:
+        assert (note.beat + note.duration_beats) * 60 / chart.bpm < analysis.duration
+
+
+def test_isolated_clicks_do_not_create_holds(analysis):
+    analysis.energy = [0.8 if any(abs(t - b) < 0.04 for b in analysis.beats) else 0
+                       for t in analysis.feature_times]
+    assert hold_end(analysis, 8, True) == analysis.beats[8]
+
+
+def test_hold_tail_uses_local_beats_with_tempo_drift(analysis):
+    analysis.beats = [float(t) for t in np.cumsum(np.linspace(0.4, 0.6, 30))]
+    assert hold_end(analysis, 8, True) == analysis.beats[12]
 
 
 @pytest.mark.parametrize("delay,variable", [(0.0, False), (1.17, False), (0.73, True)])

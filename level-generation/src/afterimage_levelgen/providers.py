@@ -23,6 +23,42 @@ def http_error(provider: str, status: int) -> ProviderError:
     return ProviderError(f"{provider}: HTTP {status} ({hint}). Provider response bodies are not logged.")
 
 
+def album_response_schema() -> dict:
+    """Send a conservative inline schema; enforce all constraints locally.
+
+    Gemini models differ in which JSON Schema constraints they accept. Inlining
+    references and keeping only shape/type/required fields avoids SDK conversion
+    of Pydantic constraints into unsupported provider fields.
+    """
+    schema = AlbumProfile.model_json_schema()
+
+    def compatible(node):
+        if "$ref" in node:
+            node = schema["$defs"][node["$ref"].rsplit("/", 1)[1]]
+        result = {key: node[key] for key in ("type", "required", "enum") if key in node}
+        if "properties" in node:
+            result["properties"] = {key: compatible(value) for key, value in node["properties"].items()}
+        if "items" in node:
+            result["items"] = compatible(node["items"])
+        return result
+
+    return compatible(schema)
+
+
+def gemini_error(exc: Exception, code: int) -> ProviderError:
+    # Classify known provider diagnostics without printing echoed inputs or keys.
+    message = str(getattr(exc, "message", "")).lower()
+    if "additional_properties" in message or "additionalproperties" in message:
+        return ProviderError(f"Gemini: HTTP {code}: the response schema contains an unsupported "
+                             "additionalProperties field. Update the pipeline's schema adapter.")
+    if "api key not valid" in message or "api_key_invalid" in message:
+        return ProviderError(f"Gemini: HTTP {code}: API key is invalid. Check GEMINI_API_KEY and reload it in your shell.")
+    if "no longer available to new users" in message:
+        return ProviderError(f"Gemini: HTTP {code}: the configured model is unavailable to new users. "
+                             "Choose an available model with --gemini-model (for example gemini-3.8-flash).")
+    return http_error("Gemini", code)
+
+
 def describe_album(photos: list[tuple[str, bytes]], description: str, model: str,
                    api_key: str, client=None) -> AlbumProfile:
     from google import genai
@@ -43,8 +79,7 @@ def describe_album(photos: list[tuple[str, bytes]], description: str, model: str
         contents.extend([f"photo_id={index}", types.Part.from_bytes(data=data, mime_type="image/jpeg")])
     try:
         response = client.models.generate_content(model=model, contents=contents, config={
-            "response_mime_type": "application/json", "response_schema": AlbumProfile,
-            "temperature": 0.2,
+            "response_mime_type": "application/json", "response_schema": album_response_schema(),
         })
         album = AlbumProfile.model_validate_json(response.text or "")
         if sorted(p.photo_id for p in album.photos) != list(range(len(photos))):
@@ -54,7 +89,7 @@ def describe_album(photos: list[tuple[str, bytes]], description: str, model: str
     except Exception as exc:
         code = getattr(exc, "code", None)
         if isinstance(code, int):
-            raise http_error("Gemini", code) from None
+            raise gemini_error(exc, code) from None
         raise ProviderError("Gemini did not return a valid album profile; check access, connectivity, and model configuration") from None
     finally:
         if owned:

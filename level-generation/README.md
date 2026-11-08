@@ -109,7 +109,11 @@ Easy uses quarter-note patterns without chords, with at most two note starts
 in any half-open one-second window. Normal adds selected local half-beat attacks
 and occasional downbeat chords, capped at four starts in the same window. Both
 leave at least two seconds before the first note, insert phrase rests, and use
-holds only in sustained passages with sparse attacks. Held lanes are reserved
+two-beat holds on Easy and up to four-beat holds on Normal when the mix has
+sustained energy, even with drums underneath. Holds start on detected downbeats
+(every fourth beat when downbeats are unavailable), at least eight beats apart,
+and last at most four seconds. This is a mix-energy heuristic, not melody-note
+transcription; isolated percussive clicks do not qualify. Held lanes are reserved
 through release, with an additional reuse gap. Chords count as two starts.
 
 Actual audio is the timing authority. A representative BPM is stored for the
@@ -142,3 +146,15 @@ Provider and algorithm references:
 [Stable Audio API](https://docs.stability.ai/api-reference/stable-audio/text-to-audio),
 [Beat This!](https://github.com/CPJKU/beat_this),
 [librosa](https://librosa.org/doc/latest/index.html).
+
+### Gemini request errors
+
+The pipeline sends an inline schema containing types, required fields, and object
+structure. Pydantic's stricter bounds and extra-field checks run locally after
+generation; sending those constraints through the older SDK can cause HTTP 400.
+
+If Gemini reports that `gemini-2.5-flash` is unavailable to new users, pass
+`--gemini-model gemini-3.8-flash`, or set `GEMINI_MODEL=gemini-3.8-flash` in your
+shell. When editing `.env`, reload it into your shell before running the CLI.
+The replacement model was verified with a real four-photo album. Switching
+models invalidates only the album interpretation stage and its dependent results.

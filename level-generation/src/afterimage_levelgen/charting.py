@@ -7,6 +7,28 @@ import numpy as np
 
 from .models import Analysis, Chart, Note
 
+CHART_VERSION = 2
+
+
+def hold_end(analysis: Analysis, index: int, normal: bool) -> float:
+    """Use sustained mix energy, allowing drums underneath a long-note phrase."""
+    start = analysis.beats[index]
+    lengths = (4, 2) if normal else (2,)
+    for length in lengths:
+        if index + length >= len(analysis.beats):
+            continue
+        end = analysis.beats[index + length]
+        if not 0.4 <= end - start <= 4 or end >= analysis.duration - 0.05:
+            continue
+        energy = np.asarray([e for t, e in zip(analysis.feature_times, analysis.energy)
+                             if start <= t <= end])
+        # Percussive clicks alone have low energy between attacks; a sustained
+        # backing can carry a hold even when the drum track has many onsets.
+        if (len(energy) and float(energy.mean()) >= 0.15
+                and float(np.quantile(energy, 0.2)) >= max(0.08, float(np.median(energy)) * 0.25)):
+            return end
+    return start
+
 
 def make_chart(analysis: Analysis, difficulty: str, title: str, seed: int) -> Chart:
     if difficulty not in {"Easy", "Normal"}:
@@ -29,6 +51,7 @@ def make_chart(analysis: Analysis, difficulty: str, title: str, seed: int) -> Ch
     recent: deque[float] = deque()
     reserved = [-1.0] * 4
     notes: list[Note] = []
+    last_hold_index = -8
     for timestamp, index, subdivision in candidates:
         if timestamp < 2 or timestamp >= analysis.duration - 0.05:
             continue
@@ -45,19 +68,17 @@ def make_chart(analysis: Analysis, difficulty: str, title: str, seed: int) -> Ch
             continue
         lane = preferred if preferred in available else min(available, key=lambda x: abs(x - preferred))
         tail = timestamp
-        if not subdivision and index % 8 == 0 and index + 2 < len(analysis.beats):
-            end = analysis.beats[index + 2]
-            attacks = sum(timestamp + 0.1 < t < end for t in analysis.onsets)
-            sustained = [e for t, e in zip(analysis.feature_times, analysis.energy) if timestamp <= t <= end]
-            if (0.4 <= end - timestamp <= 2 and end < analysis.duration - 0.05
-                    and attacks <= 1 and sustained and min(sustained) >= 0.2):
-                tail = end
+        strong = any(abs(timestamp - t) <= 0.07 for t in analysis.downbeats)
+        anchor = strong if analysis.downbeats else index % 4 == 0
+        if not subdivision and anchor and index - last_hold_index >= 8:
+            tail = hold_end(analysis, index, normal)
+            if tail > timestamp:
+                last_hold_index = index
         notes.append(Note(beat=timestamp * analysis.bpm / 60, lane=lane,
                           type="hold" if tail > timestamp else "tap",
                           duration_beats=(tail - timestamp) * analysis.bpm / 60 if tail > timestamp else None))
         reserved[lane] = tail
         recent.append(timestamp)
-        strong = any(abs(timestamp - t) <= 0.07 for t in analysis.downbeats)
         if normal and strong and index % 8 == 0 and energy >= 0.55 and len(recent) < cap:
             opposite = [other for other in available if other != lane and (other < 2) != (lane < 2)]
             if opposite:

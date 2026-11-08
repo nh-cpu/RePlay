@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from afterimage_levelgen.planning import make_plan
-from afterimage_levelgen.providers import ProviderError, describe_album, generate_music
+from afterimage_levelgen.providers import ProviderError, album_response_schema, describe_album, generate_music, gemini_error
 
 
 def client_with(handler):
@@ -95,7 +95,7 @@ def test_missing_job_id_blocks_resubmission(album):
 def test_gemini_structured_profile(album):
     class Models:
         def generate_content(self, **kwargs):
-            assert kwargs["config"]["response_schema"].__name__ == "AlbumProfile"
+            assert "photos" in kwargs["config"]["response_schema"]["properties"]
             assert len(kwargs["contents"]) == 5
             return SimpleNamespace(text=album.model_dump_json())
     result = describe_album([("a.jpg", b"a"), ("b.jpg", b"b")], "trip", "model", "key",
@@ -139,3 +139,39 @@ def test_poll_network_failure_keeps_job(album):
     with client_with(fail) as client, pytest.raises(ProviderError, match="resume"):
         generate_music(make_plan(album, 120, "electronic"), 42, "secret", state, lambda s: None, client=client)
     assert calls == ["GET"] and state["id"] == "known"
+
+
+def test_gemini_schema_omits_unsupported_keywords_and_keeps_local_validation(album):
+    import json
+    from google.genai import types
+    from pydantic import ValidationError
+    from afterimage_levelgen.models import AlbumProfile
+
+    schema = album_response_schema()
+    assert "additionalProperties" not in json.dumps(schema)
+    assert "$ref" not in json.dumps(schema)
+    assert schema["properties"]["photos"]["items"]["properties"]["activity"] == {"type": "number"}
+    assert "photos" in schema["required"]
+    types.GenerateContentConfig(response_schema=schema)
+    data = album.model_dump()
+    data["photos"][0]["unexpected"] = "bad"
+    with pytest.raises(ValidationError):
+        AlbumProfile.model_validate(data)
+    data = album.model_dump()
+    data["photos"][0]["activity"] = 2
+    with pytest.raises(ValidationError):
+        AlbumProfile.model_validate(data)
+
+
+@pytest.mark.parametrize("message,expected", [
+    ('Unknown name "additional_properties" at response_schema: private content', "unsupported"),
+    ('API key not valid. private key', "API key is invalid"),
+    ('This model is no longer available to new users. private data', "--gemini-model"),
+    ('Unknown failure with private content', "invalid request"),
+])
+def test_gemini_error_classification_does_not_expose_payload(message, expected):
+    exc = Exception()
+    exc.message = message
+    result = str(gemini_error(exc, 400))
+    assert expected in result
+    assert "private" not in result

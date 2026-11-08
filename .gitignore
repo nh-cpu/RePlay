@@ -35,3 +35,6 @@ level-generation/photos/
 level-generation/.pip-cache/
 # Uncomment if your project does not version PCK files as runtime dependencies.
 # *.pck
+
+
+.vscode/
