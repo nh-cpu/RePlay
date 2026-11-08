@@ -77,6 +77,10 @@ are not part of format version 1.
 
 ## Project structure
 
+The standalone [photo-to-level CLI](level-generation/README.md) can generate
+music from an album or turn existing audio into Easy and Normal charts. It uses
+Python 3.11 and exports files for the existing **Import JSON** workflow.
+
 - `main.tscn` / `main.gd`: small screen coordinator.
 - `data/`: typed chart/note Resources, JSON/audio loading, persistent library.
 - `gameplay/`: composed gameplay scene; independent song clock, scheduler,
