@@ -31,21 +31,68 @@ or missed note resets combo. Empty presses have no penalty. Accuracy is
 earned points divided by the chart's maximum possible points. Results show
 judgment totals, accuracy, and maximum combo. Personal best scores persist.
 
-## Importing levels
+## Create a track from photos
 
-Choose **Import JSON** on the home screen and select a chart. Its `song`
-may be a nearby relative path, an absolute path, or a bundled `res://` path.
-Supported audio is WAV, OGG Vorbis, or MP3. If the audio is missing, a second
-picker lets you locate it. Validated chart/audio pairs are copied into
-`user://levels/<unique-id>/`, so the original files can move afterward.
-Repeated imports create separate entries. Best scores live in
-`user://bests.json`. No network connection is needed.
+Choose **Create from photos**, add 1–30 JPEG/PNG/WebP photos, review their
+thumbnails, and use the arrow buttons to arrange them. Remove unwanted photos
+with ×, enter a title and optional description, then choose **Generate track**.
+Cancel discards the local draft; removing a photo never deletes the original.
+Previews are local and orientation-corrected. No upload occurs before confirmation.
+
+Generation uses the existing [Python environment](level-generation/README.md).
+The worker reads API credentials from its inherited environment, falling back to
+`level-generation/.env`. It accepts simple `KEY=value` entries with optional
+quotes/comments; shell values win. Only `GEMINI_API_KEY`, `STABILITY_API_KEY`,
+and `GEMINI_MODEL` are loaded. Keys are not stored in Godot preferences or jobs.
+Gemini receives normalized photo copies; Stable Audio receives a musical prompt.
+These provider requests require network access and may incur account charges.
+
+Style and duration are photo-inspired, with automatic duration capped at four
+minutes. The game supplies no style or duration override. One job runs at a time
+in a separate process; you can play existing songs while it works. A completed
+track appears once in the playlist, with **Easy / Normal / Hard** choices and
+separate best scores. Playback of saved tracks needs no network.
+
+Failed jobs expose **Retry saved generation**, reusing saved stages and provider
+job IDs. Unknown submission outcomes are never automatically resubmitted. If a
+provider recording exceeds four minutes, it is retained in the job workspace
+but not published or automatically regenerated. Jobs continue when you return
+to another screen or close the game; reopening reconnects or offers recovery.
+
+Normalized snapshots and generation artifacts live under
+`user://generation_jobs/album_*/`. Successful self-contained packages live under
+`user://levels/album_*/`, containing audio, three unchanged v1 charts, photos,
+and `album.json` (track identity, relative chart/photo paths, timed photo cues).
+Original photos can move afterward. Existing imported levels and the demo remain
+available; JSON import is no longer a menu action. Best scores remain in
+`user://bests.json`.
+
+**Album background** in the main and pause menus controls the same saved setting.
+Photos pan and subtly zoom, crossfading through the music plan's photo groups,
+scaled to actual audio duration. Motion follows song time and freezes on pause.
+The highway panels become translucent while notes and receptors remain opaque.
+Turning the setting off restores the plain background and opaque highway.
+Tracks without usable photos always use the plain presentation.
 
 On Windows, Godot's default user folder is
 `%APPDATA%/Godot/app_userdata/AFTERIMAGE-2.0/`.
 
-The root [example chart](level_format_example.json) can be imported directly.
-It uses the bundled demo audio by a relative filesystem path.
+For a nonstandard Python installation, edit `user://preferences.cfg`:
+
+```ini
+[generator]
+python_path="C:/path/to/python.exe"
+worker_path="C:/path/to/level-generation/src/afterimage_levelgen/godot_worker.py"
+```
+
+The defaults use this repository's `level-generation/.venv/Scripts/python.exe`.
+This integration targets desktop development; distributing Python or a hosted
+generation service is not included.
+
+## Chart format
+
+The root [example chart](level_format_example.json) documents the unchanged v1
+chart format. Legacy library folders containing `chart.json` still load.
 
 ```json
 {
@@ -77,9 +124,11 @@ are not part of format version 1.
 
 ## Project structure
 
-The standalone [photo-to-level CLI](level-generation/README.md) can generate
-music from an album or turn existing audio into Easy, Normal, and Hard charts. It uses
-Python 3.11 and exports files for the existing **Import JSON** workflow.
+The [photo-to-level CLI](level-generation/README.md) can also generate music or
+chart existing audio independently. Its local worker connects the same pipeline
+to the game. Use CLI `rechart --output <job-folder>/generation` for explicit,
+local chart upgrades without another music call. Published library copies are
+independent; recharting a job does not silently replace a playable package.
 
 - `main.tscn` / `main.gd`: small screen coordinator.
 - `data/`: typed chart/note Resources, JSON/audio loading, persistent library.
@@ -115,8 +164,10 @@ From the repository root, substitute your Godot executable for `godot`:
 ```text
 godot --headless --path afterimage-2.0 --editor --import --quit
 godot --headless --path afterimage-2.0 --script res://tests/test_runner.gd
+godot --headless --path afterimage-2.0 --script res://tests/album_checks.gd
 godot --headless --path afterimage-2.0 --script res://tests/playback_check.gd
 godot --path afterimage-2.0 --script res://tests/visual_check.gd
+godot --path afterimage-2.0 --script res://tests/album_visual_check.gd
 python tools/build_assets.py
 ```
 
@@ -128,6 +179,11 @@ recreates the deterministic demo WAV, chart, and atlas resources.
 
 Keyboard/touch merging and multi-finger input are covered by synthetic events;
 physical touchscreen feel still needs testing on a target device.
+
+Album checks use isolated temporary data and a real local preview subprocess,
+without paid requests. The album visual check uses synthetic bright/dark images.
+Provider integration is tested with mocks in the Python suite; live generation
+is separate from automated verification.
 
 
 ## License

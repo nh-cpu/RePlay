@@ -66,6 +66,37 @@ func import_chart(chart: ChartData) -> String:
 func best(path: String) -> int:
 	return int(bests.get(path, 0))
 
+func list_tracks() -> Array[Dictionary]:
+	var tracks: Array[Dictionary] = []
+	for path: String in list_paths():
+		var loader: ChartLoader = ChartLoader.new()
+		var chart: ChartData = loader.load_chart(path)
+		if chart != null:
+			tracks.append({"title": chart.title, "charts": [chart]})
+	if not DirAccess.dir_exists_absolute(root_path):
+		return tracks
+	for folder: String in DirAccess.get_directories_at(root_path):
+		var base: String = root_path.path_join(folder)
+		var manifest_path: String = base.path_join("album.json")
+		if not FileAccess.file_exists(manifest_path):
+			continue
+		var value: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
+		if not value is Dictionary or value.get("format_version") != 1 or not value.get("charts") is Dictionary:
+			continue
+		var album: AlbumData = AlbumData.from_manifest(base, value)
+		var variants: Array[ChartData] = []
+		for difficulty: String in ["easy", "normal", "hard"]:
+			var name: String = str(value.charts.get(difficulty, ""))
+			if name.is_empty() or name.get_file() != name:
+				continue
+			var chart: ChartData = ChartLoader.new().load_chart(base.path_join(name))
+			if chart != null:
+				chart.album = album
+				variants.append(chart)
+		if not variants.is_empty():
+			tracks.append({"title": str(value.get("title", variants[0].title)), "charts": variants})
+	return tracks
+
 func save_best(path: String, score: int) -> void:
 	bests[path] = maxi(best(path), score)
 	var file: FileAccess = FileAccess.open(best_path, FileAccess.WRITE)

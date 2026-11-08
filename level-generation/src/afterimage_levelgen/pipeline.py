@@ -22,9 +22,9 @@ def require_key(name: str) -> str:
     return value
 
 
-def generate(args, progress=print):
+def generate(args, progress=print, prepared_photos=None):
     progress("Preparing album photos...")
-    photos = prepare_photos(args.photos)
+    photos = prepare_photos(args.photos) if prepared_photos is None else prepared_photos
     with Store(args.output).lock() as store:
         profile_key = stage_key("album", {"photos": [(name, digest(data)) for name, data in photos],
                                           "description": args.description, "model": args.gemini_model,

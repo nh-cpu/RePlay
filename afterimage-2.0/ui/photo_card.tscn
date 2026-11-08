@@ -1,0 +1,29 @@
+[gd_scene format=3]
+[node name="PhotoCard" type="HBoxContainer"]
+theme_override_constants/separation = 6
+custom_minimum_size = Vector2(0, 72)
+[node name="Thumbnail" type="TextureRect" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 64)
+expand_mode = 1
+stretch_mode = 5
+[node name="Name" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
+theme_override_font_sizes/font_size = 14
+[node name="Earlier" type="Button" parent="."]
+layout_mode = 2
+text = "‹"
+custom_minimum_size = Vector2(40, 44)
+focus_mode = 0
+[node name="Later" type="Button" parent="."]
+layout_mode = 2
+text = "›"
+custom_minimum_size = Vector2(40, 44)
+focus_mode = 0
+[node name="Remove" type="Button" parent="."]
+layout_mode = 2
+text = "×"
+custom_minimum_size = Vector2(40, 44)
+focus_mode = 0

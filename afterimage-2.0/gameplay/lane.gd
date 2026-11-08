@@ -27,3 +27,6 @@ func flash(grade: int) -> void:
 	effect.scale = Vector2.ONE * size.x / 160.0
 	effect.scale.y *= 0.45
 	add_child(effect)
+
+func set_album_visible(value: bool) -> void:
+	$Background.color.a = 0.65 if value else 1.0

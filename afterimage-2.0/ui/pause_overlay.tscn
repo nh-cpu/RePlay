@@ -50,6 +50,9 @@ focus_mode = 0
 icon = ExtResource("1")
 expand_icon = true
 theme_override_constants/icon_max_width = 22
+[node name="Album" type="CheckButton" parent="Center/Panel/Content"]
+layout_mode = 2
+text = "Album background"
 [node name="Home" type="Button" parent="Center/Panel/Content"]
 layout_mode = 2
 custom_minimum_size = Vector2(140, 56)

@@ -6,13 +6,18 @@ const RESULTS: PackedScene = preload("res://ui/results.tscn")
 var library: LevelLibrary = LevelLibrary.new()
 var selected: ChartData
 var screen: Control
+var generation: GenerationService
 
 func _ready() -> void:
+	generation = GenerationService.new()
+	generation.name = "GenerationService"
+	add_child(generation)
 	show_home()
 
 func show_home() -> void:
 	var menu: Control = HOME.instantiate()
 	menu.library = library
+	menu.service = generation
 	menu.play_requested.connect(start_game)
 	_replace(menu)
 
@@ -20,6 +25,7 @@ func start_game(chart: ChartData) -> void:
 	selected = chart
 	var game: Control = GAME.instantiate()
 	game.chart = chart
+	game.service = generation
 	game.completed.connect(show_results)
 	game.home_requested.connect(show_home)
 	_replace(game)

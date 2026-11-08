@@ -10,6 +10,7 @@ var bpm: float = 120.0
 var offset: float = 0.0
 var notes: Array[NoteData] = []
 var audio: AudioStream
+var album: AlbumData
 
 func last_time() -> float:
 	var result: float = 0.0

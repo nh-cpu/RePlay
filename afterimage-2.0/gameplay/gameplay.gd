@@ -4,6 +4,7 @@ signal completed(result: Dictionary)
 signal home_requested
 
 var chart: ChartData
+var service: GenerationService
 var paused: bool = false
 var resuming: bool = false
 var resume_left: float = 0.0
@@ -19,6 +20,12 @@ var lanes: Array[RhythmLane] = []
 func _ready() -> void:
 	lanes = $Playfield.get_lanes()
 	controls.position_mapper = $Playfield.screen_to_surface
+	$AlbumBackground.album = chart.album
+	if service != null:
+		$AlbumBackground.enabled = service.album_background
+		$PauseOverlay/Center/Panel/Content/Album.set_pressed_no_signal(service.album_background)
+		$PauseOverlay/Center/Panel/Content/Album.toggled.connect(service.set_album_background)
+		service.album_background_changed.connect(_album_setting_changed)
 	for index: int in range(4):
 		lanes[index].configure(index)
 	$Music.stream = chart.audio
@@ -51,6 +58,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_pause()
 
 func _process(delta: float) -> void:
+	_update_album()
 	if finished:
 		return
 	if resuming:
@@ -124,3 +132,13 @@ func _on_judged(index: int, grade: int) -> void:
 func _on_hold_started(index: int, grade: int) -> void:
 	hud.feedback(grade)
 	lanes[chart.notes[index].lane].flash(grade)
+
+func _album_setting_changed(value: bool) -> void:
+	$AlbumBackground.enabled = value
+	$PauseOverlay/Center/Panel/Content/Album.set_pressed_no_signal(value)
+	_update_album()
+
+func _update_album() -> void:
+	var active: bool = $AlbumBackground.show_time(clock.time)
+	for lane: RhythmLane in lanes:
+		lane.set_album_visible(active)

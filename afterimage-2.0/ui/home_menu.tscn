@@ -34,7 +34,7 @@ theme_override_constants/margin_top = 28
 theme_override_constants/margin_bottom = 24
 [node name="Content" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 [node name="Eyebrow" type="Label" parent="Margin/Content"]
 layout_mode = 2
 text = "FOUR LANES. ONE MOMENT."
@@ -68,6 +68,19 @@ layout_mode = 2
 text = ""
 theme_override_font_sizes/font_size = 16
 autowrap_mode = 2
+[node name="Options" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Difficulty" type="OptionButton" parent="Margin/Content/Options"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Album" type="CheckButton" parent="Margin/Content/Options"]
+layout_mode = 2
+text = "Album background"
+theme_override_font_sizes/font_size = 16
+
 [node name="Buttons" type="HBoxContainer" parent="Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 16
@@ -80,10 +93,11 @@ size_flags_horizontal = 3
 icon = ExtResource("2")
 expand_icon = true
 theme_override_constants/icon_max_width = 24
-[node name="Import" type="Button" parent="Margin/Content/Buttons"]
+[node name="Create" type="Button" parent="Margin/Content/Buttons"]
 layout_mode = 2
 custom_minimum_size = Vector2(140, 56)
-text = "Import JSON"
+text = "Create from photos"
+theme_override_font_sizes/font_size = 16
 focus_mode = 0
 size_flags_horizontal = 3
 [node name="Status" type="Label" parent="Margin/Content"]
@@ -98,15 +112,7 @@ text = "D  F  J  K  /  TOUCH THE LANES\nTap on the line. Keep holds pressed unti
 theme_override_font_sizes/font_size = 16
 autowrap_mode = 2
 modulate = Color(0.6, 0.66, 0.74, 1)
-[node name="ChartPicker" type="FileDialog" parent="."]
-title = "Import a beatmap"
-file_mode = 0
-access = 2
-filters = PackedStringArray("*.json ; JSON beatmaps")
-use_native_dialog = true
-[node name="AudioPicker" type="FileDialog" parent="."]
-title = "Locate the song audio"
-file_mode = 0
-access = 2
-filters = PackedStringArray("*.wav, *.ogg, *.mp3 ; Audio files")
-use_native_dialog = true
+[node name="Retry" type="Button" parent="Margin/Content"]
+visible = false
+layout_mode = 2
+text = "Retry saved generation"

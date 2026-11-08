@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://gameplay/score_tracker.gd" id="7"]
 [ext_resource type="Script" path="res://gameplay/lane_input.gd" id="8"]
 [ext_resource type="Script" path="res://gameplay/chart_scheduler.gd" id="9"]
+[ext_resource type="PackedScene" path="res://gameplay/album_background.tscn" id="10"]
 
 [node name="Gameplay" type="Control"]
 layout_mode = 1
@@ -27,6 +28,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.047, 0.063, 0.086, 1)
+
+[node name="AlbumBackground" parent="." instance=ExtResource("10")]
 
 [node name="Playfield" parent="." instance=ExtResource("2")]
 

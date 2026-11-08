@@ -1,8 +1,8 @@
 # AFTERIMAGE photo-to-level CLI
 
 This standalone Python 3.11 tool produces `song.wav`, `easy.json`, `normal.json`,
-and `hard.json` for the game's existing **Import JSON** action. It does not change
-Godot, deploy a service, or add an upload interface to the game.
+and `hard.json`. Godot's **Create from photos** menu calls the same pipeline
+through a local worker; the CLI remains independently usable.
 
 ## Windows setup
 
@@ -133,8 +133,33 @@ when you run `generate` with the new album interpretation and arrangement.
 Change `--chart-seed` or `--title` to rebuild current-version charts without another music call.
 Changing `--seed` in album mode changes the music generation request too. Copy
 the whole output folder when moving a level; the JSON files expect `song.wav`
-beside them. Import any chart through Godot's **Import JSON** button. Previously
-imported levels are copied into Godot's library, so re-import after recharting.
+beside them. Godot-generated albums publish all three charts as one playlist
+entry. Previously imported levels remain independent copies in Godot's library.
+
+## Godot worker
+
+`src/afterimage_levelgen/godot_worker.py --request <request.json>` is the local
+bridge used by the game. Version-1 requests use `mode: preview` or
+`mode: generate`. Preview requests contain ordered `photos` paths and never
+import provider code or access the network. They produce normalized JPEGs,
+thumbnails, filenames, and content digests for duplicate detection.
+
+Generate requests contain `title`, `description`, ordered snapshot `photos`,
+and `library_root`. They use automatic style/duration, CPU analysis, and the
+configured Gemini model. The worker publishes atomic `status.json` updates
+(`running`, `complete`, or `failed` with stage information and PID).
+Only validated three-chart packages are moved into the library. Job folders
+retain the standard generation artifacts, reports, and provider state.
+
+Unlike the CLI, this worker loads simple quoted/unquoted key-value entries from
+the generator's local `.env`, without overriding inherited credentials.
+Supported names are `GEMINI_API_KEY`, `STABILITY_API_KEY`, and `GEMINI_MODEL`;
+shell interpolation is not performed. No credentials enter job requests.
+
+Photo cue times follow planned sections, scaled to actual audio duration;
+they are visual sequencing intentions, not detected musical boundaries.
+Consecutive repetitions of the same photo merge into one uninterrupted cue.
+The v1 beatmaps remain byte-for-byte pipeline outputs.
 
 Charts use four-bar phrases anchored to detected downbeats, falling back to
 16-beat phrases when downbeats are unavailable. Song-relative energy and attack
