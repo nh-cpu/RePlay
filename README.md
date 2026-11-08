@@ -5,6 +5,10 @@ Four-lane rhythm game for **Godot 4.7.2**. Open
 to launch the project. The included **First Light** track is a 36-second
 original synthesized demo with 72 taps, chord notes, and holds.
 
+The game starts in a landscape window sized to fit the current desktop monitor
+and centered within its usable area. Mobile uses the device's native screen
+with landscape orientation. Resizing the desktop window still adapts the UI.
+
 ## Playing
 
 The song wheel supports mouse-wheel scrolling, click/drag, and touch dragging
@@ -41,7 +45,9 @@ judgment totals, accuracy, and maximum combo. Personal best scores persist.
 ## Create a track from photos
 
 Choose **Create from photos**, add 1–30 JPEG/PNG/WebP photos, review their
-thumbnails, and use the arrow buttons to arrange them. Remove unwanted photos
+thumbnails, and drag the ≡ handles up/down to arrange them. The list scrolls
+automatically near its edges; dropping outside it or pressing Escape cancels
+the drag. Focus a handle and use Up/Down for keyboard reordering. Remove unwanted photos
 with ×, enter a title and optional description, then choose **Generate track**.
 Cancel discards the local draft; removing a photo never deletes the original.
 Previews are local and orientation-corrected. No upload occurs before confirmation.

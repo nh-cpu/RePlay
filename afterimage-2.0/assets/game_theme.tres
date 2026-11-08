@@ -1,7 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://y3051aeyiaux"]
 
 [ext_resource type="Texture2D" path="res://assets/panel.tres" id="1"]
-
 [ext_resource type="FontVariation" path="res://assets/fonts/outfit_regular.tres" id="font"]
 
 [sub_resource type="StyleBoxFlat" id="hover"]

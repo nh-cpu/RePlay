@@ -46,7 +46,6 @@ func _refresh() -> void:
 		var song: SongMetadata = SongMetadata.new()
 		song.id = first.source_path.get_base_dir() if first.album != null else first.source_path
 		song.title = str(track.title)
-		song.artist = first.artist
 		if first.album != null:
 			song.artwork_candidates = first.album.photos
 		for chart: ChartData in track.charts:
@@ -66,7 +65,6 @@ func _refresh() -> void:
 	$Footer/Actions/Play.disabled = values.is_empty()
 	if values.is_empty():
 		detail.get_node("Title").text = "Your next memory"
-		detail.get_node("Artist").text = "Create a track from photos to begin."
 		detail.get_node("Stats").text = ""
 		detail.get_node("Best").text = ""
 		detail.get_node("Artwork").texture = null
@@ -75,7 +73,6 @@ func _refresh() -> void:
 func _song_changed(id: String) -> void:
 	var song: SongMetadata = _metadata[id]
 	detail.get_node("Title").text = song.title
-	detail.get_node("Artist").text = song.artist
 	var texture: Texture2D = wheel.artwork_for_song(song)
 	detail.get_node("Artwork").texture = texture
 	$Artwork.show_artwork(song.artwork_path, texture)

@@ -1,6 +1,13 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://ui/photo_review.gd" id="1"]
 [ext_resource type="Theme" path="res://assets/menu/menu_theme.tres" id="2"]
+[sub_resource type="StyleBoxFlat" id="panel"]
+bg_color = Color(0.075, 0.075, 0.09, 0.97)
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 12.0
+content_margin_bottom = 12.0
+
 [node name="PhotoReview" type="Node2D"]
 script = ExtResource("1")
 [node name="Layer" type="CanvasLayer" parent="."]
@@ -28,33 +35,23 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+theme_override_styles/panel = SubResource("panel")
 [node name="Margin" type="MarginContainer" parent="Layer/Root/Panel"]
 layout_mode = 2
 [node name="Content" type="VBoxContainer" parent="Layer/Root/Panel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 10
-[node name="Heading" type="Label" parent="Layer/Root/Panel/Margin/Content"]
-layout_mode = 2
-theme_type_variation = &"TitleLabel"
-text = "CREATE FROM PHOTOS"
-theme_override_font_sizes/font_size = 26
-autowrap_mode = 2
-[node name="Hint" type="Label" parent="Layer/Root/Panel/Margin/Content"]
-layout_mode = 2
-text = "Review your memories. Move photos left/right to set their order."
-theme_override_font_sizes/font_size = 16
-autowrap_mode = 2
 [node name="TitleInput" type="LineEdit" parent="Layer/Root/Panel/Margin/Content"]
 layout_mode = 2
 placeholder_text = "Track title (required)"
 max_length = 120
 [node name="Description" type="TextEdit" parent="Layer/Root/Panel/Margin/Content"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 76)
+custom_minimum_size = Vector2(0, 48)
 placeholder_text = "Optional: describe the album or the mood"
 wrap_mode = 1
 [node name="Count" type="Label" parent="Layer/Root/Panel/Margin/Content"]
@@ -74,7 +71,7 @@ theme_override_constants/separation = 8
 [node name="Add" type="Button" parent="Layer/Root/Panel/Margin/Content"]
 layout_mode = 2
 text = "+  ADD PHOTOS"
-custom_minimum_size = Vector2(40, 44)
+custom_minimum_size = Vector2(40, 40)
 focus_mode = 2
 [node name="Status" type="Label" parent="Layer/Root/Panel/Margin/Content"]
 max_lines_visible = 2
@@ -85,23 +82,31 @@ theme_override_font_sizes/font_size = 16
 autowrap_mode = 2
 [node name="Disclosure" type="Label" parent="Layer/Root/Panel/Margin/Content"]
 layout_mode = 2
-text = "Generate sends processed photos to Gemini and requests music from Stable Audio using your configured accounts. Style and length are inspired by your photos."
+text = "Generate sends photos to Gemini and requests music from Stable Audio using your configured accounts."
 theme_override_font_sizes/font_size = 14
 autowrap_mode = 2
 [node name="Buttons" type="HBoxContainer" parent="Layer/Root/Panel/Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 12
-alignment = 2
+alignment = 0
 [node name="Cancel" type="Button" parent="Layer/Root/Panel/Margin/Content/Buttons"]
 layout_mode = 2
 text = "CANCEL"
-custom_minimum_size = Vector2(40, 44)
+custom_minimum_size = Vector2(40, 40)
 focus_mode = 2
+[node name="Spacer" type="Control" parent="Layer/Root/Panel/Margin/Content/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
 [node name="Generate" type="Button" parent="Layer/Root/Panel/Margin/Content/Buttons"]
 layout_mode = 2
 text = "GENERATE TRACK"
-custom_minimum_size = Vector2(40, 44)
+custom_minimum_size = Vector2(40, 40)
 focus_mode = 2
+[node name="DropMarker" type="ColorRect" parent="Layer/Root"]
+visible = false
+mouse_filter = 2
+color = Color(0.96, 0.92, 0.78, 1)
 [node name="Picker" type="FileDialog" parent="."]
 title = "Choose album photos"
 file_mode = 1

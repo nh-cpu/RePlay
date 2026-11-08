@@ -76,6 +76,40 @@ func _preview_and_review() -> void:
 	review.photos.append(other)
 	review._move(1, -1)
 	check(review.photos[0].name == "another.jpg", "Photo ordering")
+	await process_frame
+	await process_frame
+	var first_row: Control = review.rows.get_child(0)
+	var last_row: Control = review.rows.get_child(1)
+	review._begin_drag(-1, first_row.get_global_rect().get_center(), 0)
+	check(review._drag_index == 0 and review.get_node("Layer/Root/DropMarker").visible, "Drag displays insertion marker")
+	review._finish_drag(last_row.get_global_rect().end - Vector2(10, 1))
+	check(review.photos[1].name == "another.jpg", "Drag moves first photo to last position")
+	await process_frame
+	await process_frame
+	review._begin_drag(3, (review.rows.get_child(1) as Control).get_global_rect().get_center(), 1)
+	review._finish_drag((review.rows.get_child(0) as Control).get_global_rect().position + Vector2(20, 1))
+	check(review.photos[0].name == "another.jpg", "Touch drag moves photo upward")
+	await process_frame
+	review._begin_drag(3, Vector2.ZERO, 0)
+	var cancel_touch: InputEventScreenTouch = InputEventScreenTouch.new()
+	cancel_touch.index = 3
+	cancel_touch.canceled = true
+	review._input(cancel_touch)
+	check(review._drag_index == -1 and review.photos[0].name == "another.jpg", "Canceled drag preserves order")
+	var saved: Array[Dictionary] = review.photos.duplicate()
+	for index: int in range(28):
+		review.photos.append(other.duplicate())
+	review._rebuild()
+	await process_frame
+	await process_frame
+	var scroll: ScrollContainer = review.content.get_node("Scroll")
+	review._begin_drag(-1, scroll.get_global_rect().end - Vector2(40, 4), 0)
+	review._process(0.5)
+	check(scroll.scroll_vertical > 0, "Dragging near list edge scrolls long photo lists")
+	review._cancel_drag()
+	check(not review.get_node("Layer/Root/DropMarker").visible, "Cancel clears marker")
+	review.photos = saved
+	review._rebuild()
 	review._remove(0)
 	check(review.photos.size() == 1, "Photo removal")
 	review._remove(0)
