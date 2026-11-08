@@ -1,0 +1,93 @@
+[gd_scene format=3 uid="uid://3d4gt0jyu73x"]
+
+[ext_resource type="Script" uid="uid://cme1pssm103oi" path="res://ui/game_hud.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/pause.tres" id="2"]
+
+[ext_resource type="FontVariation" path="res://assets/fonts/outfit_bold.tres" id="bold"]
+
+[node name="HUD" type="Control" unique_id=2025895980]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Title" type="Label" parent="." unique_id=431221297]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 22.0
+offset_right = 270.0
+theme_override_font_sizes/font_size = 22
+text = "FIRST LIGHT"
+
+[node name="Score" type="Label" parent="." unique_id=1542685811]
+theme_override_fonts/font = ExtResource("bold")
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 22.0
+offset_right = -90.0
+theme_override_font_sizes/font_size = 24
+text = "0000000"
+horizontal_alignment = 2
+
+[node name="Pause" type="Button" parent="." unique_id=1719051430]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -72.0
+offset_top = 14.0
+offset_right = -20.0
+offset_bottom = 66.0
+focus_mode = 0
+icon = ExtResource("2")
+expand_icon = true
+
+[node name="Progress" type="ProgressBar" parent="." unique_id=1514316122]
+layout_mode = 0
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 78.0
+offset_right = -24.0
+offset_bottom = 81.0
+mouse_filter = 2
+show_percentage = false
+
+[node name="Feedback" type="VBoxContainer" parent="." unique_id=1154583]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.68100005
+anchor_top = 0.187
+anchor_right = 0.961
+anchor_bottom = 0.289
+offset_left = -117.880035
+offset_top = 3.3600006
+offset_right = 252.72
+offset_bottom = 46.92
+
+[node name="Combo" type="Label" parent="Feedback" unique_id=1960802914]
+theme_override_fonts/font = ExtResource("bold")
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+
+[node name="Judgment" type="Label" parent="Feedback" unique_id=389083624]
+theme_override_fonts/font = ExtResource("bold")
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+
+[node name="Countdown" type="Label" parent="." unique_id=1707117192]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.43
+anchor_right = 0.5
+anchor_bottom = 0.43
+offset_left = -180.0
+offset_right = 180.0
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1

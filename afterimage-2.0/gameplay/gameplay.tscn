@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://gameplay/gameplay.gd" id="1"]
+[ext_resource type="PackedScene" path="res://gameplay/perspective_playfield.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://ui/game_hud.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://ui/pause_overlay.tscn" id="4"]
+[ext_resource type="Script" path="res://gameplay/song_clock.gd" id="5"]
+[ext_resource type="Script" path="res://gameplay/judgment_controller.gd" id="6"]
+[ext_resource type="Script" path="res://gameplay/score_tracker.gd" id="7"]
+[ext_resource type="Script" path="res://gameplay/lane_input.gd" id="8"]
+[ext_resource type="Script" path="res://gameplay/chart_scheduler.gd" id="9"]
+[ext_resource type="PackedScene" path="res://gameplay/album_background.tscn" id="10"]
+
+[node name="Gameplay" type="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.047, 0.063, 0.086, 1)
+
+[node name="AlbumBackground" parent="." instance=ExtResource("10")]
+
+[node name="Playfield" parent="." instance=ExtResource("2")]
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+
+[node name="SongClock" type="Node" parent="."]
+process_priority = -100
+script = ExtResource("5")
+[node name="JudgmentController" type="Node" parent="."]
+script = ExtResource("6")
+[node name="ScoreTracker" type="Node" parent="."]
+script = ExtResource("7")
+[node name="LaneInput" type="Node" parent="."]
+script = ExtResource("8")
+[node name="ChartScheduler" type="Node" parent="."]
+script = ExtResource("9")
+[node name="HUD" parent="." instance=ExtResource("3")]
+
+[node name="PauseOverlay" parent="." instance=ExtResource("4")]

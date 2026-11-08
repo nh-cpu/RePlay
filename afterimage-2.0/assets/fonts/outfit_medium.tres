@@ -1,0 +1,9 @@
+[gd_resource type="FontVariation" format=3 uid="uid://ghevf5wox07y"]
+
+[ext_resource type="FontFile" uid="uid://b6l8vffojlv2y" path="res://assets/fonts/Outfit.ttf" id="1"]
+
+[resource]
+base_font = ExtResource("1")
+variation_opentype = {
+2003265652: 500.0
+}

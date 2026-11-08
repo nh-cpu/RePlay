@@ -1,0 +1,45 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://ui/photo_drag_handle.gd" id="drag"]
+[ext_resource type="Texture2D" path="res://assets/menu/close.tres" id="close"]
+
+[node name="PhotoCard" type="HBoxContainer"]
+theme_override_constants/separation = 6
+custom_minimum_size = Vector2(0, 80)
+[node name="Thumbnail" type="TextureRect" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(112, 72)
+expand_mode = 1
+stretch_mode = 5
+[node name="Spacer" type="Control" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+[node name="Handle" type="Control" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(72, 64)
+focus_mode = 2
+mouse_default_cursor_shape = 6
+tooltip_text = "Drag up or down to reorder. Keyboard: Up / Down."
+script = ExtResource("drag")
+[node name="Grip" type="Label" parent="Handle"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "≡"
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
+theme_override_font_sizes/font_size = 40
+[node name="ControlGap" type="Control" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(24, 0)
+mouse_filter = 2
+[node name="Remove" type="Button" parent="."]
+layout_mode = 2
+theme_type_variation = &"IconButton"
+tooltip_text = "Remove photo from this album"
+icon = ExtResource("close")
+expand_icon = true
+theme_override_constants/icon_max_width = 18
+custom_minimum_size = Vector2(44, 48)
+focus_mode = 2

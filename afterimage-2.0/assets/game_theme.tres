@@ -1,0 +1,60 @@
+[gd_resource type="Theme" format=3 uid="uid://y3051aeyiaux"]
+
+[ext_resource type="Texture2D" path="res://assets/panel.tres" id="1"]
+[ext_resource type="FontVariation" path="res://assets/fonts/outfit_regular.tres" id="font"]
+
+[sub_resource type="StyleBoxFlat" id="hover"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.23, 0.29, 0.35, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxTexture" id="button"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+texture = ExtResource("1")
+texture_margin_left = 36.0
+texture_margin_top = 36.0
+texture_margin_right = 36.0
+texture_margin_bottom = 36.0
+
+[sub_resource type="StyleBoxFlat" id="selected"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+bg_color = Color(0.18, 0.25, 0.32, 1)
+border_width_left = 3
+border_color = Color(0.9, 0.82, 0.65, 1)
+
+[sub_resource type="StyleBoxFlat" id="panel"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.085, 0.11, 0.145, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[resource]
+default_font = ExtResource("font")
+default_font_size = 20
+Button/colors/font_color = Color(0.94, 0.92, 0.87, 1)
+Button/styles/hover = SubResource("hover")
+Button/styles/normal = SubResource("button")
+Button/styles/pressed = SubResource("selected")
+ItemList/colors/font_color = Color(0.94, 0.92, 0.87, 1)
+ItemList/styles/panel = SubResource("panel")
+ItemList/styles/selected = SubResource("selected")
+ItemList/styles/selected_focus = SubResource("selected")
+Label/colors/font_color = Color(0.94, 0.92, 0.87, 1)
+PanelContainer/styles/panel = SubResource("panel")

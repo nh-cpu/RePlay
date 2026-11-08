@@ -1,0 +1,42 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://gameplay/perspective_playfield.gd" id="1"]
+[ext_resource type="Shader" path="res://gameplay/perspective.gdshader" id="2"]
+[ext_resource type="PackedScene" path="res://gameplay/lane.tscn" id="3"]
+
+[sub_resource type="ShaderMaterial" id="Projection"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+shader_parameter/distant_width = 0.38
+
+[node name="Playfield" type="Control"]
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Surface" type="SubViewport" parent="."]
+transparent_bg = true
+handle_input_locally = false
+gui_disable_input = true
+disable_3d = true
+size = Vector2i(680, 596)
+render_target_update_mode = 4
+
+[node name="Lanes" type="Control" parent="Surface"]
+mouse_filter = 2
+
+[node name="Lane1" parent="Surface/Lanes" instance=ExtResource("3")]
+[node name="Lane2" parent="Surface/Lanes" instance=ExtResource("3")]
+[node name="Lane3" parent="Surface/Lanes" instance=ExtResource("3")]
+[node name="Lane4" parent="Surface/Lanes" instance=ExtResource("3")]
+
+[node name="Output" type="TextureRect" parent="."]
+material = SubResource("Projection")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 0

@@ -1,6 +1,9 @@
 {
   "format_version": 1,
-  "song": "res://audio/example.ogg",
+  "title": "Format Example",
+  "artist": "AFTERIMAGE",
+  "difficulty": "Example",
+  "song": "afterimage-2.0/assets/first_light.wav",
   "bpm": 120.0,
   "offset_seconds": 0.15,
   "lane_count": 4,

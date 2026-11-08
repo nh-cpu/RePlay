@@ -1,33 +1,55 @@
-extends Node2D
+extends Control
 
-var note1 : bool = false
-var note2 : bool = false
-var note3 : bool = false
-var note4 : bool = false
-@onready var area_2d: Area2D = $Detector/Area2D
+const HOME: PackedScene = preload("res://ui/home_menu.tscn")
+const GAME: PackedScene = preload("res://gameplay/gameplay.tscn")
+const RESULTS: PackedScene = preload("res://ui/results.tscn")
+const WATCH: PackedScene = preload("res://ui/watch_mode.tscn")
+var library: LevelLibrary = LevelLibrary.new()
+var selected: ChartData
+var screen: Control
+var generation: GenerationService
 
+func _ready() -> void:
+	generation = GenerationService.new()
+	generation.name = "GenerationService"
+	add_child(generation)
+	show_home()
 
+func show_home() -> void:
+	var menu: Control = HOME.instantiate()
+	menu.library = library
+	menu.service = generation
+	menu.play_requested.connect(start_game)
+	menu.watch_requested.connect(start_watch)
+	_replace(menu)
 
-func _input(event: InputEvent) -> void:
-		if event.is_action_pressed(("ui_left")):
-			note1 = true
-		else:
-			note1 = false
-		if event.is_action_pressed("ui_up"):
-			note2 = true
-		else:
-			note2 = false
-		if event.is_action_pressed("ui_up"):
-			note3 = true
-		else:
-			note3 = false
-		if event.is_action_pressed("ui_up"):
-			note4 = true
-		else:
-			note4 = false
+func start_watch(chart: ChartData) -> void:
+	var watch: Control = WATCH.instantiate()
+	watch.chart = chart
+	watch.home_requested.connect(show_home)
+	_replace(watch)
 
+func start_game(chart: ChartData) -> void:
+	selected = chart
+	var game: Control = GAME.instantiate()
+	game.chart = chart
+	game.service = generation
+	game.completed.connect(show_results)
+	game.home_requested.connect(show_home)
+	_replace(game)
 
-func _process(_delta:float ) -> void:
-		for x in area_2d. get_overlapping_areas():
-			if note1 == true and x.name == "LeftLeft":
-					print("leftleft action")
+func show_results(result: Dictionary) -> void:
+	library.save_best(selected.source_path, int(result.score))
+	var results: Control = RESULTS.instantiate()
+	results.result = result
+	results.title = selected.title
+	results.retry_requested.connect(func() -> void: start_game(selected))
+	results.home_requested.connect(show_home)
+	_replace(results)
+
+func _replace(next: Control) -> void:
+	if is_instance_valid(screen):
+		remove_child(screen)
+		screen.queue_free()
+	screen = next
+	add_child(screen)
