@@ -138,6 +138,37 @@ def build():
         parts += [f'{kind}/styles/{s} = SubResource("input")' for s in ("normal", "read_only")]
     parts += ['PopupMenu/styles/panel = SubResource("panel")',
               'PopupMenu/styles/hover = SubResource("input")']
+    # The wheel redesign uses flatter surfaces; atlas textures remain reusable accents.
+    insert = parts.index('\n[resource]')
+    flat = []
+    for name, color, border in [
+        ("flat_button", "Color(0.92, 0.90, 0.84, 1)", "Color(0.92, 0.90, 0.84, 1)"),
+        ("flat_hover", "Color(1, 0.98, 0.92, 1)", "Color(1, 1, 0.95, 1)"),
+        ("flat_pressed", "Color(0.72, 0.71, 0.67, 1)", "Color(0.86, 0.84, 0.78, 1)"),
+        ("flat_panel", "Color(0.075, 0.075, 0.09, 0.97)", "Color(0.34, 0.33, 0.30, 1)"),
+        ("card", "Color(0.13, 0.13, 0.15, 1)", "Color(0.28, 0.28, 0.29, 1)"),
+    ]:
+        flat += [f'\n[sub_resource type="StyleBoxFlat" id="{name}"]',
+                 f'bg_color = {color}', f'border_color = {border}']
+        for side in ("left", "top", "right", "bottom"):
+            flat += [f'border_width_{side} = 1',
+                     f'content_margin_{side} = {24.0 if name == "flat_panel" else (18.0 if side in ("left", "right") else 10.0)}']
+        for corner in ("top_left", "top_right", "bottom_left", "bottom_right"):
+            flat.append(f'corner_radius_{corner} = 5')
+    parts[insert:insert] = flat
+    for index, line in enumerate(parts):
+        if line.startswith(('Button/styles/', 'OptionButton/styles/')):
+            line = line.replace('SubResource("button")', 'SubResource("flat_button")')
+            line = line.replace('SubResource("pressed")', 'SubResource("flat_pressed")')
+            if '/styles/hover =' in line:
+                line = line.replace('SubResource("flat_button")', 'SubResource("flat_hover")')
+        if line.startswith(('PanelContainer/styles/', 'PopupMenu/styles/panel')):
+            line = line.replace('SubResource("panel")', 'SubResource("flat_panel")')
+        parts[index] = line
+    parts += ['SongCard/styles/normal = SubResource("card")',
+              'SongTitle/base_type = &"Label"',
+              'SongTitle/fonts/font = ExtResource("semibold")',
+              'SongTitle/font_sizes/font_size = 22']
     (MENU / "menu_theme.tres").write_text("\n".join(parts) + "\n", encoding="utf-8")
 
 

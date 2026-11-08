@@ -1,130 +1,81 @@
 [gd_scene format=3]
-
 [ext_resource type="Script" path="res://ui/home_menu.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/menu/play.tres" id="2"]
-
-[ext_resource type="Theme" path="res://assets/menu/menu_theme.tres" id="menu"]
+[ext_resource type="Theme" path="res://assets/menu/menu_theme.tres" id="theme"]
 [ext_resource type="PackedScene" path="res://ui/menu_backdrop.tscn" id="backdrop"]
-
+[ext_resource type="PackedScene" path="res://ui/menu_artwork.tscn" id="art"]
+[ext_resource type="PackedScene" path="res://ui/song_wheel.tscn" id="wheel"]
 [ext_resource type="Script" path="res://ui/atlas_toggle.gd" id="toggle"]
-
 [node name="HomeMenu" type="Control"]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("theme")
 script = ExtResource("1")
-theme = ExtResource("menu")
-
 [node name="Background" parent="." instance=ExtResource("backdrop")]
-
-[node name="Margin" type="MarginContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_bottom = 24
-[node name="Content" type="VBoxContainer" parent="Margin"]
-layout_mode = 2
-theme_override_constants/separation = 14
-[node name="Eyebrow" type="Label" parent="Margin/Content"]
-layout_mode = 2
-theme_type_variation = &"SectionLabel"
-text = "FOUR LANES  /  ONE MOMENT"
-theme_override_font_sizes/font_size = 14
-modulate = Color(0.76, 0.73, 0.66, 1)
-[node name="Title" type="Label" parent="Margin/Content"]
-layout_mode = 2
+[node name="Artwork" parent="." instance=ExtResource("art")]
+[node name="Header" type="VBoxContainer" parent="."]
+mouse_filter = 2
+[node name="Brand" type="Label" parent="Header"]
 theme_type_variation = &"TitleLabel"
-text = "AFTERIMAGE"
-theme_override_font_sizes/font_size = 44
-
-[node name="Subtitle" type="Label" parent="Margin/Content"]
-layout_mode = 2
-text = "Find the pulse. Leave an echo."
-theme_override_font_sizes/font_size = 20
-
-[node name="Section" type="Label" parent="Margin/Content"]
-layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "AFTERIMAGE / SELECT"
+[node name="Count" type="Label" parent="Header"]
 theme_type_variation = &"SectionLabel"
-text = "YOUR TRACKS"
-theme_override_font_sizes/font_size = 14
-modulate = Color(0.76, 0.73, 0.66, 1)
-[node name="LibraryPanel" type="PanelContainer" parent="Margin/Content"]
-layout_mode = 2
-size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 140)
-
-[node name="Levels" type="ItemList" parent="Margin/Content/LibraryPanel"]
-layout_mode = 2
-theme_type_variation = &"LibraryList"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-allow_reselect = true
+text = "YOUR MEMORIES, IN RHYTHM"
+[node name="Details" type="VBoxContainer" parent="."]
+mouse_filter = 2
+theme_override_constants/separation = 10
+[node name="Artwork" type="TextureRect" parent="Details"]
+custom_minimum_size = Vector2(0, 142)
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+[node name="Title" type="Label" parent="Details"]
+theme_type_variation = &"TitleLabel"
+theme_override_font_sizes/font_size = 34
 text_overrun_behavior = 3
-fixed_column_width = 0
-same_column_width = true
-theme_override_constants/line_separation = 22
+max_lines_visible = 2
+autowrap_mode = 2
+[node name="Artist" type="Label" parent="Details"]
+theme_override_font_sizes/font_size = 16
+text_overrun_behavior = 3
+[node name="Stats" type="Label" parent="Details"]
+theme_override_font_sizes/font_size = 16
+[node name="Best" type="Label" parent="Details"]
+theme_type_variation = &"ScoreLabel"
 theme_override_font_sizes/font_size = 22
-[node name="Detail" type="Label" parent="Margin/Content"]
-layout_mode = 2
-text = ""
-theme_override_font_sizes/font_size = 16
-autowrap_mode = 2
-[node name="Options" type="HBoxContainer" parent="Margin/Content"]
-layout_mode = 2
+[node name="Wheel" parent="." instance=ExtResource("wheel")]
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+[node name="Footer" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 8
+[node name="Status" type="Label" parent="Footer"]
+theme_override_font_sizes/font_size = 13
+text = "SCROLL / ↑ ↓ SONGS   ·   ← → DIFFICULTY   ·   ENTER TO PLAY"
+text_overrun_behavior = 3
+custom_minimum_size = Vector2(0, 20)
+[node name="Actions" type="HBoxContainer" parent="Footer"]
 theme_override_constants/separation = 12
-
-[node name="Difficulty" type="OptionButton" parent="Margin/Content/Options"]
-layout_mode = 2
+[node name="Create" type="Button" parent="Footer/Actions"]
+custom_minimum_size = Vector2(0, 52)
 size_flags_horizontal = 3
-
-[node name="Album" type="CheckButton" parent="Margin/Content/Options"]
-script = ExtResource("toggle")
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "+ CREATE FROM PHOTOS"
+[node name="Play" type="Button" parent="Footer/Actions"]
+custom_minimum_size = Vector2(120, 52)
+size_flags_horizontal = 3
+text = "PLAY →"
+[node name="Options" type="HBoxContainer" parent="Footer"]
+theme_override_constants/separation = 12
+[node name="Album" type="CheckButton" parent="Footer/Options"]
+custom_minimum_size = Vector2(0, 36)
+size_flags_horizontal = 3
 text = "Album background"
-theme_override_font_sizes/font_size = 16
-
-[node name="Buttons" type="HBoxContainer" parent="Margin/Content"]
-layout_mode = 2
-theme_override_constants/separation = 16
-[node name="Play" type="Button" parent="Margin/Content/Buttons"]
-layout_mode = 2
-custom_minimum_size = Vector2(140, 56)
-text = "PLAY"
-focus_mode = 2
-size_flags_horizontal = 3
-icon = ExtResource("2")
-expand_icon = true
-theme_override_constants/icon_max_width = 24
-[node name="Create" type="Button" parent="Margin/Content/Buttons"]
-layout_mode = 2
-custom_minimum_size = Vector2(140, 56)
-text = "CREATE FROM PHOTOS"
-theme_override_font_sizes/font_size = 16
-focus_mode = 2
-size_flags_horizontal = 3
-[node name="Status" type="Label" parent="Margin/Content"]
-layout_mode = 2
-text = ""
-theme_override_font_sizes/font_size = 16
-autowrap_mode = 2
-modulate = Color(0.85, 0.81, 0.7, 1)
-[node name="Controls" type="Label" parent="Margin/Content"]
-layout_mode = 2
-text = "D  F  J  K   /   TOUCH THE LANES\nTap on the line. Hold through the tail."
-theme_override_font_sizes/font_size = 16
-autowrap_mode = 2
-modulate = Color(0.65, 0.64, 0.61, 1)
-[node name="Retry" type="Button" parent="Margin/Content"]
+script = ExtResource("toggle")
+[node name="Retry" type="Button" parent="Footer/Options"]
 visible = false
-layout_mode = 2
-text = "Retry saved generation"
+theme_override_font_sizes/font_size = 13
+text = "RETRY GENERATION"

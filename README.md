@@ -7,6 +7,13 @@ original synthesized demo with 72 taps, chord notes, and holds.
 
 ## Playing
 
+The song wheel supports mouse-wheel scrolling, click/drag, and touch dragging
+with inertia and snapping. **Up/down** or the controller D-pad/left stick browses
+songs; **left/right** chooses an expanded difficulty. **Enter**, controller
+confirm, or **Play** starts the chart. Double-click/tap a difficulty row to start
+it directly. Each song remembers its chosen difficulty while the menu is open.
+Photo artwork in the menu is independent of the gameplay Album background switch.
+
 - **D / F / J / K**: lanes 1–4, left to right. Bindings live in Project Settings
   → Input Map under `lane_1` through `lane_4`.
 - On a touchscreen, press anywhere inside a lane. Multiple fingers work
@@ -135,7 +142,10 @@ independent; recharting a job does not silently replace a playable package.
 - `gameplay/`: composed gameplay scene; independent song clock, scheduler,
   judgment controller, score tracker, and input router. Lane, receptor, tap,
   hold, and effect scenes can be edited independently.
-- `ui/`: home, HUD, pause, and results scenes.
+- `ui/`: home, reusable SongWheel/SongCard, photo review, HUD, pause, and results.
+  The wheel consumes SongMetadata/SongDifficultyMetadata Resources and emits
+  stable song/chart IDs; only the home controller maps those IDs to gameplay.
+  It pools 13 cards, bounds its artwork cache to 16 entries, and owns no audio.
 - `assets/`: atlas regions/theme and original demo audio.
 - `levels/`: bundled demo chart.
 - `tests/`: deterministic rules tests, real-time playback check, and rendered
@@ -168,6 +178,8 @@ godot --headless --path afterimage-2.0 --script res://tests/album_checks.gd
 godot --headless --path afterimage-2.0 --script res://tests/playback_check.gd
 godot --path afterimage-2.0 --script res://tests/visual_check.gd
 godot --path afterimage-2.0 --script res://tests/album_visual_check.gd
+godot --headless --path afterimage-2.0 --script res://tests/song_wheel_checks.gd
+godot --path afterimage-2.0 --script res://tests/song_wheel_visual.gd
 python tools/build_assets.py
 ```
 

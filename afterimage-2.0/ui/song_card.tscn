@@ -1,0 +1,19 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://ui/song_card.gd" id="1"]
+[ext_resource type="Theme" path="res://assets/menu/menu_theme.tres" id="theme"]
+[node name="SongCard" type="Control"]
+mouse_filter = 2
+theme = ExtResource("theme")
+script = ExtResource("1")
+[node name="Title" type="Label" parent="."]
+mouse_filter = 2
+theme_type_variation = &"SongTitle"
+text_overrun_behavior = 3
+[node name="Artist" type="Label" parent="."]
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+modulate = Color(0.76, 0.75, 0.72, 1)
+text_overrun_behavior = 3
+[node name="Rows" type="Control" parent="."]
+mouse_filter = 2
+clip_contents = true
